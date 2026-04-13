@@ -4261,7 +4261,7 @@ function isAuthErrorResponse(data) {
 
 async function forceLogout(redirectMessage) {
   try {
-    if (sessionToken) {
+    if (sessionToken && EXEC_URL) {
       await fetch(EXEC_URL, {
         method: "POST",
         headers: {
