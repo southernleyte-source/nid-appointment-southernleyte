@@ -20,7 +20,7 @@
         <img class="logo" src="logo-partner.png" alt="National ID Logo">
       </div>
       <h2>National ID System</h2>
-      <p>Appointment Request<br>PSA Southern Leyte Fixed Registration Center</p>
+      <p>Appointment Request<br><span id="headerAgencyName">Philippine Statistics Authority - Regional Statistical Services No. 8</span></p>
     </div>
 
     <div class="card" id="mainFormCard">
@@ -52,6 +52,9 @@
 
       <div class="form-section step-section" data-step="1" data-step-label="Step 1 · Service">
         <h3 class="section-title">Select Service</h3>
+
+        <label for="province">Province <span class="req">*</span></label>
+        <select id="province" required></select>
 
         <label for="service">Select Service <span class="req">*</span></label>
         <select id="service" required>
@@ -132,6 +135,10 @@
         <h4>Appointment Summary</h4>
 
         <div class="summary-grid">
+          <div class="summary-item">
+            <span>Province</span>
+            <strong id="summaryProvince">Not selected</strong>
+          </div>
           <div class="summary-item">
             <span>Service</span>
             <strong id="summaryService">Not selected</strong>
@@ -441,6 +448,10 @@
 
     <div class="confirm-summary-card">
       <div class="confirm-item">
+        <span class="confirm-label">Province</span>
+        <span class="confirm-value" id="cProvince"></span>
+      </div>
+      <div class="confirm-item">
         <span class="confirm-label">Full Name</span>
         <span class="confirm-value" id="cName"></span>
       </div>
@@ -485,7 +496,7 @@
       </div>
 
       <h2 class="slip-title">National ID Appointment Slip</h2>
-      <p class="slip-subtitle">Philippine Statistics Authority – Southern Leyte</p>
+      <p class="slip-subtitle" id="slipSubtitle">Philippine Statistics Authority - Regional Statistical Services No. 8</p>
       <div class="slip-divider"></div>
 
       <div class="slip-qr-wrap">
@@ -496,6 +507,11 @@
       </div>
 
       <div class="slip-details">
+        <div class="slip-item">
+          <div class="slip-label">Province</div>
+          <div class="slip-value" id="sProvince"></div>
+        </div>
+
         <div class="slip-item">
           <div class="slip-label">Reference Number</div>
           <div class="slip-value" id="sRef"></div>
@@ -528,11 +544,8 @@
 
         <div class="slip-item slip-item-address">
           <div class="slip-label">Center</div>
-          <div class="slip-value">
-            National ID Fixed Registration Center<br>
-            2nd Floor SJC Building<br>
-            Tunga-Tunga, Maasin City,<br>
-            Southern Leyte
+          <div class="slip-value" id="sCenterAddress">
+            National ID Fixed Registration Center
           </div>
         </div>
       </div>
@@ -578,7 +591,9 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="config.js"></script>
 <script>
-const EXEC_URL = (window.NID_API_CONFIG && window.NID_API_CONFIG.EXEC_URL) || "";
+const APP_CONFIG = window.NID_API_CONFIG || {};
+const AGENCY_NAME = APP_CONFIG.AGENCY_NAME || "Philippine Statistics Authority - Regional Statistical Services No. 8";
+const DEFAULT_PROVINCE = APP_CONFIG.DEFAULT_PROVINCE || "SOUTHERN_LEYTE";
 const TIME_OPTIONS = ["08:00 AM","09:00 AM","10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM","04:00 PM"];
 
 const DEFAULT_SLOTS = {
@@ -604,17 +619,142 @@ let systemMessageAutoTimer = null;
 
 /* ================= UTILITIES ================= */
 
-function postJson(payload, options = {}) {
-  if (!EXEC_URL) {
-    throw new Error("Missing API configuration. Set EXEC_URL in config.js.");
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function normalizeProvinceKey(value) {
+  if (typeof APP_CONFIG.normalizeProvinceKey === "function") {
+    return APP_CONFIG.normalizeProvinceKey(value);
   }
 
-  return fetch(EXEC_URL, {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function getStoredProvinceKey() {
+  try {
+    return localStorage.getItem("nid_selected_province") || DEFAULT_PROVINCE;
+  } catch (err) {
+    return DEFAULT_PROVINCE;
+  }
+}
+
+function setStoredProvinceKey(provinceKey) {
+  try {
+    localStorage.setItem("nid_selected_province", provinceKey);
+  } catch (err) {
+    // Local storage can be unavailable in strict browser modes.
+  }
+}
+
+function getProvinceOptions() {
+  if (typeof APP_CONFIG.getProvinceOptions === "function") {
+    return APP_CONFIG.getProvinceOptions();
+  }
+
+  return [{ key: DEFAULT_PROVINCE, label: "SOUTHERN LEYTE" }];
+}
+
+function getSelectedProvinceKey() {
+  const selected = document.getElementById("province")?.value || getStoredProvinceKey();
+  return normalizeProvinceKey(selected || DEFAULT_PROVINCE);
+}
+
+function getProvinceConfig(provinceKey = getSelectedProvinceKey()) {
+  if (typeof APP_CONFIG.getProvinceConfig === "function") {
+    return APP_CONFIG.getProvinceConfig(provinceKey);
+  }
+
+  return {
+    key: DEFAULT_PROVINCE,
+    label: "SOUTHERN LEYTE",
+    execUrl: APP_CONFIG.EXEC_URL || "",
+    addressLines: [
+      "2nd Floor SJC Building",
+      "Tunga-Tunga, Maasin City",
+      "Southern Leyte"
+    ]
+  };
+}
+
+function getSelectedProvinceConfig() {
+  return getProvinceConfig(getSelectedProvinceKey());
+}
+
+function getSelectedExecUrl() {
+  const province = getSelectedProvinceConfig();
+  return province && province.execUrl ? province.execUrl : "";
+}
+
+function getSelectedProvinceLabel() {
+  const province = getSelectedProvinceConfig();
+  return province && province.label ? province.label : "SOUTHERN LEYTE";
+}
+
+function getCenterAddressHtml(province = getSelectedProvinceConfig()) {
+  const lines = [
+    "National ID Fixed Registration Center",
+    ...((province && province.addressLines) || [])
+  ];
+  return lines.map(escapeHtml).join("<br>");
+}
+
+function populateProvinceSelect() {
+  const select = document.getElementById("province");
+  if (!select) return;
+
+  const selectedKey = normalizeProvinceKey(getStoredProvinceKey());
+  select.innerHTML = getProvinceOptions().map(province => `
+    <option value="${escapeHtml(province.key)}"${province.key === selectedKey ? " selected" : ""}>${escapeHtml(province.label)}</option>
+  `).join("");
+
+  if (!select.value) {
+    select.value = DEFAULT_PROVINCE;
+  }
+}
+
+function updateProvinceUi() {
+  const province = getSelectedProvinceConfig();
+  const provinceLabel = province.label || "SOUTHERN LEYTE";
+
+  document.getElementById("headerAgencyName").textContent = AGENCY_NAME;
+  document.getElementById("slipSubtitle").textContent = `${AGENCY_NAME} - ${provinceLabel}`;
+
+  const centerAddress = document.getElementById("sCenterAddress");
+  if (centerAddress) {
+    centerAddress.innerHTML = getCenterAddressHtml(province);
+  }
+
+  document.title = `National ID Appointment System - ${provinceLabel}`;
+}
+
+function postJson(payload, options = {}) {
+  const execUrl = getSelectedExecUrl();
+  const province = getSelectedProvinceConfig();
+
+  if (!execUrl) {
+    throw new Error("Missing API configuration for the selected province. Set the Web App URL in config.js.");
+  }
+
+  return fetch(execUrl, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain;charset=UTF-8"
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      ...payload,
+      province: province.label,
+      provinceKey: province.key
+    }),
     ...options
   });
 }
@@ -628,6 +768,7 @@ function getRequestErrorMessage(err, fallbackMessage) {
 
 function setFormDisabled(disabled) {
   const formCard = document.getElementById("mainFormCard");
+  const province = document.getElementById("province");
   const service = document.getElementById("service");
 
   if (disabled) {
@@ -636,6 +777,7 @@ function setFormDisabled(disabled) {
     formCard.classList.remove("form-disabled");
   }
 
+  if (province) province.disabled = disabled;
   service.disabled = disabled;
 }
 
@@ -1168,38 +1310,39 @@ function validateApplicantFields(showErrors = false) {
 }
 
 function updateStepState() {
+  const province = getSelectedProvinceKey();
   const service = document.getElementById("service").value;
   const date = document.getElementById("date").value;
   const time = document.getElementById("time").value;
   const applicant = validateApplicantFields(false);
-  const readyToSubmit = !!(service && date && time && applicant.valid && !document.getElementById("submitBtn").disabled);
+  const readyToSubmit = !!(province && service && date && time && applicant.valid && !document.getElementById("submitBtn").disabled);
 
   document.querySelectorAll(".wizard-step").forEach(stepEl => {
     const step = Number(stepEl.dataset.step || 0);
     stepEl.classList.remove("active", "done");
 
-    if (step === 1 && service) stepEl.classList.add("done");
-    if (step === 2 && service && date && time) stepEl.classList.add("done");
-    if (step === 3 && service && date && time && applicant.valid) stepEl.classList.add("done");
+    if (step === 1 && province && service) stepEl.classList.add("done");
+    if (step === 2 && province && service && date && time) stepEl.classList.add("done");
+    if (step === 3 && province && service && date && time && applicant.valid) stepEl.classList.add("done");
     if (step === 4 && readyToSubmit) stepEl.classList.add("done");
 
-    if ((step === 1 && !service) ||
-        (step === 2 && service && (!date || !time)) ||
-        (step === 3 && service && date && time && !applicant.valid) ||
-        (step === 4 && service && date && time && applicant.valid && !readyToSubmit)) {
+    if ((step === 1 && (!province || !service)) ||
+        (step === 2 && province && service && (!date || !time)) ||
+        (step === 3 && province && service && date && time && !applicant.valid) ||
+        (step === 4 && province && service && date && time && applicant.valid && !readyToSubmit)) {
       stepEl.classList.add("active");
     }
   });
 
-  document.getElementById("pillStep1")?.classList.toggle("done", !!service);
-  document.getElementById("pillStep2")?.classList.toggle("done", !!(service && date && time));
-  document.getElementById("pillStep3")?.classList.toggle("done", !!(service && date && time && applicant.valid));
+  document.getElementById("pillStep1")?.classList.toggle("done", !!(province && service));
+  document.getElementById("pillStep2")?.classList.toggle("done", !!(province && service && date && time));
+  document.getElementById("pillStep3")?.classList.toggle("done", !!(province && service && date && time && applicant.valid));
   document.getElementById("pillStep4")?.classList.toggle("done", readyToSubmit);
 
-  document.getElementById("pillStep1")?.classList.toggle("active", !service);
-  document.getElementById("pillStep2")?.classList.toggle("active", !!service && (!date || !time));
-  document.getElementById("pillStep3")?.classList.toggle("active", !!(service && date && time && !applicant.valid));
-  document.getElementById("pillStep4")?.classList.toggle("active", !!(service && date && time && applicant.valid && !readyToSubmit));
+  document.getElementById("pillStep1")?.classList.toggle("active", !province || !service);
+  document.getElementById("pillStep2")?.classList.toggle("active", !!(province && service && (!date || !time)));
+  document.getElementById("pillStep3")?.classList.toggle("active", !!(province && service && date && time && !applicant.valid));
+  document.getElementById("pillStep4")?.classList.toggle("active", !!(province && service && date && time && applicant.valid && !readyToSubmit));
 }
 
 function renderTimeGrid(items = [], loading = false) {
@@ -1473,10 +1616,12 @@ function formatPrettyDate(dateStr) {
 }
 
 function updateSummary() {
+  const province = getSelectedProvinceLabel();
   const service = document.getElementById("service").value || "Not selected";
   const rawDate = document.getElementById("date").value;
   const time = document.getElementById("time").value || "Not selected";
 
+  document.getElementById("summaryProvince").textContent = province;
   document.getElementById("summaryService").textContent = service;
   document.getElementById("summaryDate").textContent = rawDate ? formatPrettyDate(rawDate) : "Not selected";
   document.getElementById("summaryTime").textContent = time === "Not selected" ? time : formatTimeRangeLabel(time);
@@ -1545,6 +1690,8 @@ function resetSlotInfo() {
 }
 
 function resetForm() {
+  const provinceKey = getSelectedProvinceKey();
+  document.getElementById("province").value = provinceKey;
   document.getElementById("service").value = "";
   document.getElementById("time").value = "";
   document.getElementById("fullname").value = "";
@@ -1572,6 +1719,42 @@ function resetForm() {
   setAvailabilityInfo("");
 
   ["nidModal", "updateModal", "ephilidModal", "trnModal"].forEach(id => closeModal(id));
+}
+
+function resetProvinceScheduleState(calendar) {
+  monthlyBooked = {};
+  dailySlotCache = {};
+  monthlySlotCache = {};
+  dateSlotCache = {};
+  bookingWindowEndDate = null;
+
+  document.getElementById("time").value = "";
+  renderTimeGrid([]);
+
+  if (calendar) {
+    calendar.clear();
+    calendar.redraw();
+  }
+
+  setDateInputDisabled(!document.getElementById("service").value);
+  setTimeInputDisabled(true);
+  setApplicantFieldsDisabled(true);
+  setAvailabilityInfo("");
+  updateBookingWindowBadge();
+  updateSummary();
+}
+
+function handleProvinceChange(calendar) {
+  const provinceKey = getSelectedProvinceKey();
+  setStoredProvinceKey(provinceKey);
+  updateProvinceUi();
+  resetProvinceScheduleState(calendar);
+
+  loadSystemSettings().then(() => {
+    if (document.getElementById("service").value && calendar) {
+      fetchMonthlyData(calendar);
+    }
+  });
 }
 
 function renderSlotInfo(data, info) {
@@ -1621,18 +1804,26 @@ function openSlipWithReference(refCode, fullname, service, date, time) {
   dailySlotCache = {};
   monthlyBooked = {};
 
+  const provinceLabel = getSelectedProvinceLabel();
+  const province = getSelectedProvinceConfig();
+
+  document.getElementById("sProvince").textContent = provinceLabel;
   document.getElementById("sRef").textContent = refCode;
   document.getElementById("sName").textContent = fullname.toUpperCase();
   document.getElementById("sService").textContent = service;
   document.getElementById("sDate").textContent = formatAppointmentDate(date);
   document.getElementById("sTime").textContent = formatTimeRangeLabel(time);
+  document.getElementById("sCenterAddress").innerHTML = getCenterAddressHtml(province);
+  document.getElementById("slipSubtitle").textContent = `${AGENCY_NAME} - ${provinceLabel}`;
 
   const qrPayload =
     "Reference: " + refCode + "\n" +
+    "Province: " + provinceLabel + "\n" +
     "Name: " + fullname.toUpperCase() + "\n" +
     "Service: " + service + "\n" +
     "Date: " + formatAppointmentDate(date) + "\n" +
-    "Time: " + formatTimeRangeLabel(time);
+    "Time: " + formatTimeRangeLabel(time) + "\n" +
+    "Center: National ID Fixed Registration Center, " + ((province.addressLines || []).join(", "));
 
   drawSlipQR(qrPayload);
   openModal("slipModal");
@@ -1648,6 +1839,7 @@ async function verifyTimedOutBooking(payload, retries = 8, delayMs = 2500) {
     try {
       const res = await postJson({
         action: "checkRecentBooking",
+        province: payload.province || getSelectedProvinceLabel(),
         service: payload.service,
         fullname: payload.fullname,
         email: payload.email,
@@ -1712,6 +1904,7 @@ async function loadSystemSettings() {
 /* ================= CONFIRM MODAL ================= */
 
 function openConfirmModal() {
+  const province = getSelectedProvinceLabel();
   const service = document.getElementById("service").value;
   const date = document.getElementById("date").value;
   const time = document.getElementById("time").value;
@@ -1720,7 +1913,7 @@ function openConfirmModal() {
   const email = applicant.email;
   const phone = applicant.phone;
 
-  if (!service || !date || !time || !fullname) {
+  if (!province || !service || !date || !time || !fullname) {
     showSystemMessage("Missing Fields", "Please complete all required fields before proceeding.");
     updateStepState();
     return;
@@ -1732,6 +1925,7 @@ function openConfirmModal() {
     return;
   }
 
+  document.getElementById("cProvince").textContent = province;
   document.getElementById("cName").textContent = fullname;
   document.getElementById("cService").textContent = service;
   document.getElementById("cDate").textContent = formatPrettyDate(date);
@@ -2051,7 +2245,7 @@ window.printSlip = function() {
     .helper-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
     .summary-box.enhanced{border:1px solid #d0d5dd;background:#f8fafc}
     .summary-box.enhanced h4{margin-bottom:12px}
-    .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
     .summary-item{padding:12px;border-radius:12px;background:#fff;border:1px solid #e4e7ec}
     .summary-item span{display:block;color:#667085;font-size:12px;margin-bottom:4px}
     .summary-item strong{color:#101828;font-size:14px;word-break:break-word}
@@ -2076,11 +2270,11 @@ window.printSlip = function() {
   <footer class="official-footer">
     <div class="official-footer-inner">
       <div class="official-footer-brand">
-        <strong>Philippine Statistics Authority</strong>
+        <strong>${escapeHtml(AGENCY_NAME)}</strong>
         <span>National ID Appointment Request</span>
       </div>
       <div class="official-footer-meta">
-        <span>PSA Southern Leyte Fixed Registration Center</span>
+        <span>${escapeHtml(getSelectedProvinceLabel())} Fixed Registration Center</span>
         <span>For official scheduling use only</span>
       </div>
     </div>
@@ -2172,6 +2366,7 @@ window.submitForm = async function() {
   const loader = document.getElementById("btnLoader");
   const maxBusyRetries = 3;
 
+  const province = getSelectedProvinceLabel();
   const service = document.getElementById("service").value;
   const fullname = document.getElementById("fullname").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -2179,7 +2374,7 @@ window.submitForm = async function() {
   const date = document.getElementById("date").value;
   const time = document.getElementById("time").value;
 
-  if (!service || !fullname || !date || !time) {
+  if (!province || !service || !fullname || !date || !time) {
     resetConfirmButtons();
     showSystemMessage("Missing Fields", "Please complete all required fields.");
     return;
@@ -2204,6 +2399,7 @@ window.submitForm = async function() {
     for (let attempt = 0; attempt <= maxBusyRetries; attempt++) {
       const res = await postJson({
         action: "submitAppointment",
+        province,
         service,
         fullname,
         email,
@@ -2291,6 +2487,7 @@ window.submitForm = async function() {
       setConfirmLoading(true, "Request timed out. Checking if your booking was recorded...");
 
       const verified = await verifyTimedOutBooking({
+        province,
         service,
         fullname,
         email,
@@ -2434,9 +2631,12 @@ async function fetchMonthlyData(instance, options = {}) {
 /* ================= DOM READY ================= */
 
 document.addEventListener("DOMContentLoaded", function() {
+  const provinceSelect = document.getElementById("province");
   const serviceSelect = document.getElementById("service");
   const timeSelect = document.getElementById("time");
 
+  populateProvinceSelect();
+  updateProvinceUi();
   setFormDisabled(true);
   openModal("privacyModal");
   loadSystemSettings();
@@ -2617,6 +2817,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
       updateSummary();
     }
+  });
+
+  provinceSelect.addEventListener("change", function() {
+    handleProvinceChange(calendar);
   });
 
   serviceSelect.addEventListener("change", function() {
