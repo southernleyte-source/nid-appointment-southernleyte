@@ -575,8 +575,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="config.js"></script>
 <script>
-const EXEC_URL = "hhttps://script.google.com/macros/s/AKfycbwX5tgcvZtl3BPQ7RtCPn6EoLKx2GBxCG6zEbUlWIsabKeJfEwFH5XusI6Vu8B145Wf3g/exec";
+const EXEC_URL = (window.NID_API_CONFIG && window.NID_API_CONFIG.EXEC_URL) || "";
 const TIME_OPTIONS = ["08:00 AM","09:00 AM","10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM","04:00 PM"];
 
 const DEFAULT_SLOTS = {
@@ -603,6 +604,10 @@ let systemMessageAutoTimer = null;
 /* ================= UTILITIES ================= */
 
 function postJson(payload, options = {}) {
+  if (!EXEC_URL) {
+    throw new Error("Missing API configuration. Set EXEC_URL in config.js.");
+  }
+
   return fetch(EXEC_URL, {
     method: "POST",
     headers: {
