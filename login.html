@@ -193,8 +193,9 @@
     </p>
   </div>
 
+  <script src="config.js"></script>
   <script>
-    const EXEC_URL = "https://script.google.com/macros/s/AKfycbwX5tgcvZtl3BPQ7RtCPn6EoLKx2GBxCG6zEbUlWIsabKeJfEwFH5XusI6Vu8B145Wf3g/exec";
+    const EXEC_URL = (window.NID_API_CONFIG && window.NID_API_CONFIG.EXEC_URL) || "";
 
     function alreadyLoggedIn() {
       const token = sessionStorage.getItem("nid_session_token");
@@ -296,6 +297,10 @@
       const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       try {
+        if (!EXEC_URL) {
+          throw new Error("Missing API configuration. Set EXEC_URL in config.js.");
+        }
+
         const res = await fetch(EXEC_URL, {
           method: "POST",
           headers: {
