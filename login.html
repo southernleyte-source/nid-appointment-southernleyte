@@ -84,7 +84,8 @@
       color: var(--muted);
     }
 
-    .field input {
+    .field input,
+    .field select {
       width: 100%;
       padding: 12px 14px;
       border: 1px solid var(--border);
@@ -94,7 +95,8 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .field input:focus {
+    .field input:focus,
+    .field select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 4px rgba(30, 90, 168, 0.08);
     }
@@ -171,10 +173,15 @@
     </div>
 
     <p class="subtitle">
-      Enter your username and password to access the National ID dashboard.
+      Philippine Statistics Authority - Regional Statistical Services No. 8
     </p>
 
     <div id="loginNotice" class="notice"></div>
+
+    <div class="field">
+      <label for="province">Province</label>
+      <select id="province"></select>
+    </div>
 
     <div class="field">
       <label for="username">Username</label>
@@ -195,13 +202,89 @@
 
   <script src="config.js"></script>
   <script>
-    const EXEC_URL = (window.NID_API_CONFIG && window.NID_API_CONFIG.EXEC_URL) || "";
+    const APP_CONFIG = window.NID_API_CONFIG || {};
+    const DEFAULT_PROVINCE = APP_CONFIG.DEFAULT_PROVINCE || "SOUTHERN_LEYTE";
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function normalizeProvinceKey(value) {
+      if (typeof APP_CONFIG.normalizeProvinceKey === "function") {
+        return APP_CONFIG.normalizeProvinceKey(value);
+      }
+
+      return String(value || "")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+    }
+
+    function getProvinceOptions() {
+      if (typeof APP_CONFIG.getProvinceOptions === "function") {
+        return APP_CONFIG.getProvinceOptions();
+      }
+
+      return [{ key: DEFAULT_PROVINCE, label: "SOUTHERN LEYTE" }];
+    }
+
+    function getProvinceConfig(provinceKey) {
+      if (typeof APP_CONFIG.getProvinceConfig === "function") {
+        return APP_CONFIG.getProvinceConfig(provinceKey);
+      }
+
+      return { key: DEFAULT_PROVINCE, label: "SOUTHERN LEYTE", execUrl: APP_CONFIG.EXEC_URL || "" };
+    }
+
+    function getStoredProvinceKey() {
+      try {
+        return sessionStorage.getItem("nid_province") || localStorage.getItem("nid_selected_province") || DEFAULT_PROVINCE;
+      } catch (err) {
+        return sessionStorage.getItem("nid_province") || DEFAULT_PROVINCE;
+      }
+    }
+
+    function getSelectedProvinceKey() {
+      return normalizeProvinceKey(document.getElementById("province")?.value || getStoredProvinceKey());
+    }
+
+    function getSelectedProvinceConfig() {
+      return getProvinceConfig(getSelectedProvinceKey());
+    }
+
+    function getSelectedExecUrl() {
+      const province = getSelectedProvinceConfig();
+      return province && province.execUrl ? province.execUrl : "";
+    }
+
+    function populateProvinceSelect() {
+      const select = document.getElementById("province");
+      if (!select) return;
+
+      const selectedKey = normalizeProvinceKey(getStoredProvinceKey());
+      select.innerHTML = getProvinceOptions().map(province => `
+        <option value="${escapeHtml(province.key)}"${province.key === selectedKey ? " selected" : ""}>${escapeHtml(province.label)}</option>
+      `).join("");
+
+      if (!select.value) select.value = DEFAULT_PROVINCE;
+    }
 
     function alreadyLoggedIn() {
       const token = sessionStorage.getItem("nid_session_token");
       const expiresAt = Number(sessionStorage.getItem("nid_session_expires") || 0);
+      const province = sessionStorage.getItem("nid_province");
 
       if (!token) return false;
+      if (!province) {
+        clearStoredSession();
+        return false;
+      }
       if (expiresAt && Date.now() >= expiresAt) {
         clearStoredSession();
         return false;
@@ -217,11 +300,14 @@
       sessionStorage.removeItem("nid_name");
       sessionStorage.removeItem("nid_title");
       sessionStorage.removeItem("nid_username");
+      sessionStorage.removeItem("nid_province");
     }
 
     function redirectToAdmin() {
       window.location.href = "admin.html";
     }
+
+    populateProvinceSelect();
 
     if (alreadyLoggedIn()) {
       redirectToAdmin();
@@ -241,10 +327,12 @@
 
     function setLoading(isLoading) {
       const btn = document.getElementById("loginBtn");
+      const provinceInput = document.getElementById("province");
       const usernameInput = document.getElementById("username");
       const passwordInput = document.getElementById("password");
 
       btn.disabled = isLoading;
+      provinceInput.disabled = isLoading;
       usernameInput.disabled = isLoading;
       passwordInput.disabled = isLoading;
       btn.textContent = isLoading ? "Logging In..." : "Log In";
@@ -283,8 +371,14 @@
     async function login() {
       clearNotice();
 
+      const selectedProvince = getSelectedProvinceConfig();
       const enteredUsername = sanitizeInput(document.getElementById("username").value);
       const enteredPassword = sanitizeInput(document.getElementById("password").value);
+
+      if (!selectedProvince || !selectedProvince.key) {
+        showNotice("Please select a province.");
+        return;
+      }
 
       if (!enteredUsername || !enteredPassword) {
         showNotice("Please enter username and password.");
@@ -297,17 +391,20 @@
       const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       try {
-        if (!EXEC_URL) {
-          throw new Error("Missing API configuration. Set EXEC_URL in config.js.");
+        const execUrl = getSelectedExecUrl();
+        if (!execUrl) {
+          throw new Error("Missing API configuration for the selected province. Set the Web App URL in config.js.");
         }
 
-        const res = await fetch(EXEC_URL, {
+        const res = await fetch(execUrl, {
           method: "POST",
           headers: {
             "Content-Type": "text/plain;charset=UTF-8"
           },
           body: JSON.stringify({
             action: "login",
+            province: selectedProvince.label,
+            provinceKey: selectedProvince.key,
             username: enteredUsername,
             password: enteredPassword
           }),
@@ -348,6 +445,12 @@
         sessionStorage.setItem("nid_name", name || "");
         sessionStorage.setItem("nid_title", title || "");
         sessionStorage.setItem("nid_username", usernameResp || enteredUsername);
+        sessionStorage.setItem("nid_province", selectedProvince.key);
+        try {
+          localStorage.setItem("nid_selected_province", selectedProvince.key);
+        } catch (err) {
+          // Local storage can be unavailable in strict browser modes.
+        }
 
 
         showNotice("Login successful. Redirecting...", "success");
