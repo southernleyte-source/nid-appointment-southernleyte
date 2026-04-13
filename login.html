@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personnel Login - National ID System</title>
+  <style>
+    :root {
+      --primary: #1e5aa8;
+      --primary-dark: #17407c;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe3ef;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #eaf2ff, #f4f7fb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--text);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      padding: 30px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .brand img {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #eef4ff;
+      padding: 6px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      color: var(--primary);
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      font: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(30, 90, 168, 0.08);
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .notice {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .notice.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    .notice.success {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .help {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .loading-text {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="brand">
+      <img src="logo-psa.png" alt="PSA Logo">
+      <div>
+        <h1>Personnel Login</h1>
+      </div>
+    </div>
+
+    <p class="subtitle">
+      Enter your username and password to access the National ID dashboard.
+    </p>
+
+    <div id="loginNotice" class="notice"></div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" type="text" placeholder="Enter username" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Enter password" autocomplete="current-password">
+    </div>
+
+    <button class="btn" id="loginBtn">Log In</button>
+
+    <p class="help">
+      This page is for authorized personnel only.
+    </p>
+  </div>
+
+  <script>
+    const EXEC_URL = "https://script.google.com/macros/s/AKfycbwX5tgcvZtl3BPQ7RtCPn6EoLKx2GBxCG6zEbUlWIsabKeJfEwFH5XusI6Vu8B145Wf3g/exec";
+
+    function alreadyLoggedIn() {
+      const token = sessionStorage.getItem("nid_session_token");
+      const expiresAt = Number(sessionStorage.getItem("nid_session_expires") || 0);
+
+      if (!token) return false;
+      if (expiresAt && Date.now() >= expiresAt) {
+        clearStoredSession();
+        return false;
+      }
+
+      return true;
+    }
+
+    function clearStoredSession() {
+      sessionStorage.removeItem("nid_session_token");
+      sessionStorage.removeItem("nid_session_expires");
+      sessionStorage.removeItem("nid_role");
+      sessionStorage.removeItem("nid_name");
+      sessionStorage.removeItem("nid_title");
+      sessionStorage.removeItem("nid_username");
+    }
+
+    function redirectToAdmin() {
+      window.location.href = "admin.html";
+    }
+
+    if (alreadyLoggedIn()) {
+      redirectToAdmin();
+    }
+
+    function showNotice(message, type = "error") {
+      const el = document.getElementById("loginNotice");
+      el.className = `notice show ${type}`;
+      el.textContent = message;
+    }
+
+    function clearNotice() {
+      const el = document.getElementById("loginNotice");
+      el.className = "notice";
+      el.textContent = "";
+    }
+
+    function setLoading(isLoading) {
+      const btn = document.getElementById("loginBtn");
+      const usernameInput = document.getElementById("username");
+      const passwordInput = document.getElementById("password");
+
+      btn.disabled = isLoading;
+      usernameInput.disabled = isLoading;
+      passwordInput.disabled = isLoading;
+      btn.textContent = isLoading ? "Logging In..." : "Log In";
+    }
+
+    function sanitizeInput(value) {
+      return String(value || "").trim();
+    }
+
+    function findNestedValue(obj, keys) {
+      if (!obj || typeof obj !== "object") return null;
+
+      for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key] != null) {
+          const value = obj[key];
+          if (typeof value === "string" && value.trim()) return value.trim();
+          if (typeof value === "number" && !Number.isNaN(value)) return value;
+          if (typeof value === "boolean") return value;
+        }
+      }
+
+      for (const value of Object.values(obj)) {
+        if (typeof value === "object") {
+          const nested = findNestedValue(value, keys);
+          if (nested != null) return nested;
+        }
+      }
+
+      return null;
+    }
+
+    function isSuccessStatus(value) {
+      return value === "success" || value === "ok" || value === "authenticated" || value === "authorized" || value === true || value === "true" || value === 1 || value === "1";
+    }
+
+    async function login() {
+      clearNotice();
+
+      const enteredUsername = sanitizeInput(document.getElementById("username").value);
+      const enteredPassword = sanitizeInput(document.getElementById("password").value);
+
+      if (!enteredUsername || !enteredPassword) {
+        showNotice("Please enter username and password.");
+        return;
+      }
+
+      setLoading(true);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+      try {
+        const res = await fetch(EXEC_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=UTF-8"
+          },
+          body: JSON.stringify({
+            action: "login",
+            username: enteredUsername,
+            password: enteredPassword
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        const data = await res.json();
+
+        const success = isSuccessStatus(data.status) || isSuccessStatus(data.result?.status) || isSuccessStatus(data.data?.status) || isSuccessStatus(data.statusCode) || isSuccessStatus(data.result?.statusCode) || isSuccessStatus(data.data?.statusCode);
+        if (!success) {
+          throw new Error(data.message || data.result?.message || data.data?.message || "Login failed.");
+        }
+
+        const sessionToken = findNestedValue(data, ["sessionToken", "session_token", "token", "authToken", "auth_token", "sessionId", "session", "accessToken", "access_token"]);
+        const expiresValue = findNestedValue(data, ["sessionExpiresAt", "session_expires_at", "expiresAt", "expiry", "expireAt", "expiresIn", "expires_in", "validUntil", "valid_until", "ttl"]);
+        let sessionExpiresAt = Number(expiresValue || 0);
+        if (sessionExpiresAt && sessionExpiresAt < 1e12) {
+          sessionExpiresAt = sessionExpiresAt * 1000;
+        }
+        if (!sessionExpiresAt) {
+          sessionExpiresAt = Date.now() + 3600 * 1000;
+        }
+        const role = findNestedValue(data, ["role", "userRole", "roleName"]);
+        const name = findNestedValue(data, ["name", "fullname", "displayName", "full_name", "userFullName"]);
+        const title = findNestedValue(data, ["title", "designation", "jobTitle", "job_title", "position"]);
+        const usernameResp = findNestedValue(data, ["username", "user", "userName", "account"]);
+
+        if (!sessionToken) {
+          throw new Error("Login succeeded but no session token was returned.");
+        }
+
+        clearStoredSession();
+        sessionStorage.setItem("nid_session_token", sessionToken);
+        sessionStorage.setItem("nid_session_expires", String(sessionExpiresAt));
+        sessionStorage.setItem("nid_role", role || "");
+        sessionStorage.setItem("nid_name", name || "");
+        sessionStorage.setItem("nid_title", title || "");
+        sessionStorage.setItem("nid_username", usernameResp || enteredUsername);
+
+
+        showNotice("Login successful. Redirecting...", "success");
+
+        setTimeout(() => {
+          redirectToAdmin();
+        }, 500);
+      } catch (err) {
+        clearTimeout(timeoutId);
+
+        if (err.name === "AbortError") {
+          showNotice("Login request timed out. Please try again.");
+        } else {
+          showNotice(err.message || "Unable to log in.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", login);
+
+    document.getElementById("password").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") login();
+    });
+
+    document.getElementById("username").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") login();
+    });
+  </script>
+</body>
+</html>
