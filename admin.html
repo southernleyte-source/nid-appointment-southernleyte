@@ -2134,7 +2134,7 @@
           <img src="logo-psa.png" alt="PSA logo">
           <div>
             <h1>Admin Dashboard</h1>
-            <p>National ID Appointment System</p>
+            <p>Philippine Statistics Authority - Regional Statistical Services No. 8</p>
           </div>
         </div>
 
@@ -2151,6 +2151,10 @@
               <div class="sidebar-user-block">
                 <span class="sidebar-user-name-label">Designation</span>
                 <div class="sidebar-user-role" id="sidebarUserRole">Registration Kit Operator</div>
+              </div>
+              <div class="sidebar-user-block">
+                <span class="sidebar-user-name-label">Province</span>
+                <div class="sidebar-user-role" id="sidebarUserProvince">SOUTHERN LEYTE</div>
               </div>
             </div>
           </div>
@@ -2944,7 +2948,9 @@
 
   <script src="config.js"></script>
   <script>
-const EXEC_URL = (window.NID_API_CONFIG && window.NID_API_CONFIG.EXEC_URL) || "";
+const APP_CONFIG = window.NID_API_CONFIG || {};
+const AGENCY_NAME = APP_CONFIG.AGENCY_NAME || "Philippine Statistics Authority - Regional Statistical Services No. 8";
+const DEFAULT_PROVINCE = APP_CONFIG.DEFAULT_PROVINCE || "SOUTHERN_LEYTE";
 
 let username = sessionStorage.getItem("nid_username") || "";
 let sessionToken = sessionStorage.getItem("nid_session_token") || "";
@@ -2952,6 +2958,13 @@ let sessionExpiresAt = Number(sessionStorage.getItem("nid_session_expires") || 0
 let userRole = sessionStorage.getItem("nid_role") || "";
 let displayName = sessionStorage.getItem("nid_name") || "";
 let userTitle = sessionStorage.getItem("nid_title") || "";
+let selectedProvinceKey = sessionStorage.getItem("nid_province") || (() => {
+  try {
+    return localStorage.getItem("nid_selected_province") || "";
+  } catch (err) {
+    return "";
+  }
+})() || DEFAULT_PROVINCE;
 
 let bookings = [];
 let archivedBookings = [];
@@ -3061,6 +3074,51 @@ const sectionMap = {
   settings: ["settingsSection", "System Settings", "Control weekend booking rules, booking window, and archive behavior."]
 };
 
+function normalizeProvinceKey(value) {
+  if (typeof APP_CONFIG.normalizeProvinceKey === "function") {
+    return APP_CONFIG.normalizeProvinceKey(value);
+  }
+
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function getProvinceConfig(provinceKey = selectedProvinceKey) {
+  if (typeof APP_CONFIG.getProvinceConfig === "function") {
+    return APP_CONFIG.getProvinceConfig(provinceKey);
+  }
+
+  return { key: DEFAULT_PROVINCE, label: "SOUTHERN LEYTE", execUrl: APP_CONFIG.EXEC_URL || "" };
+}
+
+function getSelectedProvinceConfig() {
+  selectedProvinceKey = normalizeProvinceKey(selectedProvinceKey || DEFAULT_PROVINCE);
+  return getProvinceConfig(selectedProvinceKey);
+}
+
+function getSelectedProvinceLabel() {
+  const province = getSelectedProvinceConfig();
+  return province && province.label ? province.label : "SOUTHERN LEYTE";
+}
+
+function getSelectedExecUrl() {
+  const province = getSelectedProvinceConfig();
+  return province && province.execUrl ? province.execUrl : "";
+}
+
+function persistSelectedProvince() {
+  selectedProvinceKey = normalizeProvinceKey(selectedProvinceKey || DEFAULT_PROVINCE);
+  sessionStorage.setItem("nid_province", selectedProvinceKey);
+  try {
+    localStorage.setItem("nid_selected_province", selectedProvinceKey);
+  } catch (err) {
+    // Local storage can be unavailable in strict browser modes.
+  }
+}
+
 function clearStoredSession() {
   sessionStorage.removeItem("nid_session_token");
   sessionStorage.removeItem("nid_session_expires");
@@ -3068,10 +3126,17 @@ function clearStoredSession() {
   sessionStorage.removeItem("nid_role");
   sessionStorage.removeItem("nid_name");
   sessionStorage.removeItem("nid_title");
+  sessionStorage.removeItem("nid_province");
 }
 
 function requireLogin() {
   if (!sessionToken) {
+    window.location.href = "login.html";
+    return false;
+  }
+
+  if (!selectedProvinceKey) {
+    clearStoredSession();
     window.location.href = "login.html";
     return false;
   }
@@ -4261,14 +4326,17 @@ function isAuthErrorResponse(data) {
 
 async function forceLogout(redirectMessage) {
   try {
-    if (sessionToken && EXEC_URL) {
-      await fetch(EXEC_URL, {
+    const execUrl = getSelectedExecUrl();
+    if (sessionToken && execUrl) {
+      await fetch(execUrl, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain;charset=UTF-8"
         },
         body: JSON.stringify({
           action: "logout",
+          province: getSelectedProvinceLabel(),
+          provinceKey: getSelectedProvinceConfig().key,
           sessionToken
         })
       });
@@ -4287,19 +4355,24 @@ async function forceLogout(redirectMessage) {
 }
 
 async function apiRequest(payload) {
-  if (!EXEC_URL) {
-    throw new Error("Missing API configuration. Set EXEC_URL in config.js.");
+  const province = getSelectedProvinceConfig();
+  const execUrl = getSelectedExecUrl();
+
+  if (!execUrl) {
+    throw new Error("Missing API configuration for the selected province. Set the Web App URL in config.js.");
   }
 
   const finalPayload = {
     ...payload,
+    province: province.label,
+    provinceKey: province.key,
     sessionToken,
     token: sessionToken,
     authToken: sessionToken,
     session_token: sessionToken
   };
 
-  const res = await fetch(EXEC_URL, {
+  const res = await fetch(execUrl, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain;charset=UTF-8"
@@ -4355,10 +4428,12 @@ function getNameInitials(name) {
 function renderSidebarProfile() {
   const greetingEl = document.getElementById("sidebarUserGreeting");
   const roleEl = document.getElementById("sidebarUserRole");
+  const provinceEl = document.getElementById("sidebarUserProvince");
 
   const name = getSidebarDisplayName();
   if (greetingEl) greetingEl.textContent = name;
   if (roleEl) roleEl.textContent = getSidebarRoleLabel();
+  if (provinceEl) provinceEl.textContent = getSelectedProvinceLabel();
 }
 
 function setAdminState(data) {
@@ -5598,6 +5673,7 @@ async function validateSessionOnLoad() {
   sessionStorage.setItem("nid_role", userRole);
   sessionStorage.setItem("nid_name", displayName);
   sessionStorage.setItem("nid_title", userTitle);
+  persistSelectedProvince();
   if (result.sessionExpiresAt) {
     sessionExpiresAt = Number(result.sessionExpiresAt);
     sessionStorage.setItem("nid_session_expires", String(sessionExpiresAt));
@@ -5610,6 +5686,8 @@ async function validateSessionOnLoad() {
 document.addEventListener("DOMContentLoaded", () => {
 
   if (!requireLogin()) return;
+  persistSelectedProvince();
+  document.title = `National ID Admin Dashboard - ${getSelectedProvinceLabel()}`;
 
   const todayIso = getTodayIso();
 
@@ -5638,12 +5716,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pageTitle) pageTitle.textContent = "Personnel Assistance Dashboard";
     if (pageDesc) pageDesc.textContent = "Check in clients, guide the service flow, and record the final result from one process modal.";
     if (brandTitle) brandTitle.textContent = "Personnel Desk";
-    if (brandDesc) brandDesc.textContent = "National ID Appointment System";
+    if (brandDesc) brandDesc.textContent = AGENCY_NAME;
     if (document.getElementById("filterScope")) {
       document.getElementById("filterScope").value = "active";
     }
     if (document.getElementById("filterDate")) {
-      document.getElementById("filterDate").value = todayIso;
+      document.getElementById("filterDate").value = "";
     }
 
     switchSection("bookings");
@@ -5740,7 +5818,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filterService").value = "";
     document.getElementById("filterStatus").value = "";
     document.getElementById("filterScope").value = "active";
-    document.getElementById("filterDate").value = userRole === "personnel" ? todayIso : "";
+    document.getElementById("filterDate").value = "";
     document.getElementById("filterSearch").value = "";
     renderBookingsTable();
   });
