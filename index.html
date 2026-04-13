@@ -618,6 +618,13 @@ function postJson(payload, options = {}) {
   });
 }
 
+function getRequestErrorMessage(err, fallbackMessage) {
+  const message = String(err && err.message ? err.message : "");
+  return message.includes("Missing API configuration")
+    ? message
+    : fallbackMessage;
+}
+
 function setFormDisabled(disabled) {
   const formCard = document.getElementById("mainFormCard");
   const service = document.getElementById("service");
@@ -2411,7 +2418,7 @@ async function fetchMonthlyData(instance, options = {}) {
     setTimeInputDisabled(true);
     setApplicantFieldsDisabled(true);
     renderTimeGrid([]);
-    setAvailabilityInfo("Unable to load available dates. Please try again.", "#b42318");
+    setAvailabilityInfo(getRequestErrorMessage(err, "Unable to load available dates. Please try again."), "#b42318");
     if (calendarEl) calendarEl.classList.remove("calendar-loading");
     setCalendarLoadingHint(false);
     if (keepOpen || wasOpen) {
