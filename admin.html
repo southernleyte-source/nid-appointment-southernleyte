@@ -1,0 +1,5825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>National ID Admin Dashboard</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --primary: #1e5aa8;
+      --primary-dark: #17407c;
+      --primary-soft: #eaf2ff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d8e3f0;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+      --shadow-soft: 0 4px 14px rgba(15, 23, 42, 0.04);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f7f9fd 0%, #f3f6fb 100%);
+      color: var(--text);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 292px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 34%),
+        radial-gradient(circle at 88% 18%, rgba(205, 33, 42, 0.18) 0%, rgba(205, 33, 42, 0) 30%),
+        radial-gradient(circle at 12% 82%, rgba(244, 193, 67, 0.16) 0%, rgba(244, 193, 67, 0) 28%),
+        linear-gradient(180deg, #0a3478 0%, #0c4d97 44%, #0a3f7c 100%);
+      color: #fff;
+      padding: 24px 18px 20px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar::before,
+    .sidebar::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+      border-radius: 999px;
+      filter: blur(8px);
+    }
+
+    .sidebar::before {
+      width: 220px;
+      height: 220px;
+      top: -92px;
+      right: -94px;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 72%);
+    }
+
+    .sidebar::after {
+      width: 180px;
+      height: 180px;
+      bottom: 56px;
+      left: -88px;
+      background: radial-gradient(circle, rgba(244, 193, 67, 0.16) 0%, rgba(244, 193, 67, 0) 72%);
+    }
+
+    .sidebar-top {
+      display: grid;
+      gap: 22px;
+      align-content: start;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 0;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 28px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.06) 100%);
+      box-shadow: 0 24px 40px rgba(8, 26, 58, 0.22);
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 0;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ffffff 0%, #f4c143 48%, #ce212a 100%);
+      opacity: 0.95;
+    }
+
+    .brand::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 48%);
+      pointer-events: none;
+    }
+
+    .brand > div {
+      min-width: 0;
+    }
+
+    .brand img {
+      width: 62px;
+      height: 62px;
+      object-fit: contain;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(246,249,255,0.96) 100%);
+      border-radius: 20px;
+      padding: 7px;
+      box-shadow:
+        0 14px 28px rgba(5, 15, 35, 0.2),
+        inset 0 1px 0 rgba(255,255,255,0.7);
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand h1 {
+      font-size: 24px;
+      line-height: 1;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand p {
+      margin: 7px 0 0;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(240, 245, 255, 0.88);
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-user-card {
+      padding: 18px;
+      border-radius: 28px;
+      background: linear-gradient(160deg, rgba(8, 39, 89, 0.48) 0%, rgba(255,255,255,0.08) 100%);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 24px 38px rgba(8, 26, 58, 0.18);
+      backdrop-filter: blur(16px);
+      display: grid;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-user-card::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      right: 18px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f4c143 0%, #ffffff 44%, #ce212a 100%);
+    }
+
+    .sidebar-user-card::after {
+      content: "";
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      top: -70px;
+      right: -40px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(116, 201, 255, 0.14) 0%, rgba(116, 201, 255, 0) 70%);
+      pointer-events: none;
+    }
+
+    .sidebar-user-top {
+      display: grid;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-user-copy {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .sidebar-user-kicker {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: rgba(244, 246, 255, 0.72);
+      font-weight: 700;
+      padding-top: 4px;
+    }
+
+    .sidebar-user-name {
+      margin: 0;
+      display: grid;
+      gap: 6px;
+      line-height: 1.08;
+      color: #fff;
+    }
+
+    .sidebar-user-block {
+      display: grid;
+      gap: 6px;
+    }
+
+    .sidebar-user-name-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(234, 240, 255, 0.74);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-user-name-value {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+      overflow-wrap: anywhere;
+    }
+
+    .sidebar-user-role {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 700;
+      text-align: left;
+      overflow-wrap: anywhere;
+      color: rgba(250, 252, 255, 0.96);
+    }
+
+    .sidebar-user-actions {
+      display: grid;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-user-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(7, 31, 69, 0.38);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: rgba(240, 246, 255, 0.9);
+      font-weight: 700;
+    }
+
+    .sidebar-user-status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #86efac;
+      box-shadow: 0 0 0 6px rgba(134, 239, 172, 0.14);
+      flex-shrink: 0;
+    }
+
+    .nav-group {
+      display: grid;
+      gap: 12px;
+      margin-top: 0;
+      padding: 14px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(6, 33, 76, 0.34) 0%, rgba(255,255,255,0.08) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 34px rgba(8, 26, 58, 0.12);
+    }
+
+    .sidebar-section-label {
+      padding: 0 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 197, 77, 0.9);
+    }
+
+    .nav-btn {
+      border: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #fff;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 10px 18px rgba(7, 20, 42, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-btn::after {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-top: 2px solid currentColor;
+      border-right: 2px solid currentColor;
+      transform: rotate(45deg);
+      margin-left: auto;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.12);
+      transform: translateY(-1px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 16px 24px rgba(7, 20, 42, 0.12);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, #ffffff 0%, #fff7e8 100%);
+      color: #0f4689;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.4),
+        0 20px 30px rgba(8, 26, 58, 0.2);
+    }
+
+    .nav-btn:hover::after,
+    .nav-btn.active::after {
+      opacity: 0.55;
+      transform: rotate(45deg) translate(1px, -1px);
+    }
+
+    .nav-btn.active .nav-icon {
+      opacity: 1;
+      background: linear-gradient(180deg, #fff1cc 0%, #ffe2a1 100%);
+      color: #a43a11;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+
+    .nav-btn > span:last-child {
+      flex: 1;
+    }
+
+    .sidebar-footer {
+      display: none;
+    }
+
+    .sidebar-logout-btn {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 14px 15px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-start;
+      box-shadow: 0 18px 30px rgba(8, 26, 58, 0.16);
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      backdrop-filter: blur(14px);
+    }
+
+    .sidebar-logout-btn:hover {
+      background: linear-gradient(180deg, rgba(206, 33, 42, 0.24) 0%, rgba(255,255,255,0.1) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 22px 34px rgba(8, 26, 58, 0.18);
+    }
+
+    .sidebar-logout-label {
+      display: grid;
+      gap: 2px;
+      text-align: left;
+    }
+
+    .sidebar-logout-label strong {
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .sidebar-logout-label span {
+      font-size: 11px;
+      color: rgba(255,255,255,0.76);
+    }
+
+    .sidebar-footer-note {
+      display: none;
+    }
+
+    .nav-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 16px;
+      opacity: 0.95;
+      background: rgba(255,255,255,0.08);
+      color: inherit;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .sidebar-logout-btn .nav-icon {
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+      color: #ffd36a;
+    }
+
+    .content {
+      padding: 26px 22px 28px;
+      display: grid;
+      gap: 20px;
+      align-content: start;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-wrap h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .title-wrap p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(30, 90, 168, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f3f7fd;
+      color: var(--primary);
+      border: 1px solid #d8e4f5;
+    }
+
+    .btn-secondary:hover {
+      background: #e7effa;
+      transform: translateY(-1px);
+    }
+
+    .actions .btn {
+      min-width: 124px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .metric-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      padding: 20px 18px 18px;
+      min-height: 122px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid var(--border);
+    }
+
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.09);
+    }
+
+    .metric-total {
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    }
+
+    .metric-total::before {
+      background: #1e5aa8;
+    }
+
+    .metric-today {
+      background: linear-gradient(180deg, #ffffff 0%, #f4fbff 100%);
+    }
+
+    .metric-today::before {
+      background: #0891b2;
+    }
+
+    .metric-pending {
+      background: linear-gradient(180deg, #ffffff 0%, #fffaf0 100%);
+    }
+
+    .metric-pending::before {
+      background: #f59e0b;
+    }
+
+    .metric-slots {
+      background: linear-gradient(180deg, #ffffff 0%, #f7f8ff 100%);
+    }
+
+    .metric-slots::before {
+      background: #6366f1;
+    }
+
+    .metric-label {
+      color: #667085;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .metric-value {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+    }
+
+    .metric-total .metric-value {
+      color: #1e5aa8;
+    }
+
+    .metric-today .metric-value {
+      color: #0891b2;
+    }
+
+    .metric-pending .metric-value {
+      color: #d97706;
+    }
+
+    .metric-slots .metric-value {
+      color: #4f46e5;
+    }
+
+    .metric-sub {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 22px;
+      margin-top: 4px;
+      align-items: start;
+    }
+
+    .schedule-admin-shell {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .schedule-admin-intro {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .schedule-admin-intro-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .schedule-admin-intro-card {
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+    }
+
+    .schedule-admin-intro-card span {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef5ff;
+      color: #1e5aa8;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .schedule-admin-intro-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+      color: #111827;
+      letter-spacing: -0.02em;
+    }
+
+    .schedule-admin-intro-card p {
+      margin: 0;
+      color: #667085;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .schedule-admin-note {
+      margin: 0 0 16px;
+      color: #667085;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select,
+    .field textarea,
+    .search-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(30, 90, 168, 0.08);
+      background: #fff;
+    }
+
+    .search-input::placeholder,
+    .field input::placeholder {
+      color: #9aa5b1;
+    }
+
+    .panel-title .search-input {
+      max-width: 360px;
+      margin-left: auto;
+      min-width: 260px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 980px;
+      background: #fff;
+    }
+
+    th,
+    td {
+      padding: 18px 14px;
+      border-bottom: 1px solid #edf2f7;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f7faff;
+      color: #64748b;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fcfdff;
+    }
+
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    tbody td[colspan] {
+      padding: 22px 16px;
+      color: #64748b;
+      text-align: center;
+      background: #fbfdff;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 64px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-confirmed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-record-live {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-record-archived {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      border: none;
+      border-radius: 12px;
+      padding: 7px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .mini-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .mini-edit {
+      background: #e7efff;
+      color: #1d4ed8;
+    }
+
+    .mini-slot {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .mini-delete {
+      background: #fee9e9;
+      color: #b91c1c;
+    }
+
+    .slot-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .slot-item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: #fbfdff;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .slot-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .slot-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .slot-meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .slot-pill {
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eff6ff;
+      color: var(--primary);
+      white-space: nowrap;
+      min-width: 92px;
+      text-align: center;
+    }
+
+    .dashboard-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .dashboard-left,
+    .dashboard-right {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .dashboard-filter-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      padding: 18px 22px;
+    }
+
+    .dashboard-filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-filter-bar h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .dashboard-filter-bar p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .compact-field {
+      min-width: 230px;
+      max-width: 260px;
+    }
+
+    .dashboard-right-top {
+      margin-top: 0;
+    }
+
+    .dashboard-left .table-wrap table {
+      min-width: 760px;
+    }
+
+    .dashboard-right .slot-list {
+      gap: 12px;
+    }
+
+    .service-breakdown {
+      display: grid;
+      gap: 12px;
+    }
+
+    .service-breakdown .slot-item {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+
+    .service-breakdown .slot-item strong {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .service-breakdown .slot-meta {
+      font-size: 12px;
+      color: #667085;
+    }
+
+    .service-breakdown .slot-pill {
+      background: #edf4ff;
+      color: #1e5aa8;
+    }
+
+    #saveQuickSlotBtn {
+      margin-top: 6px;
+      width: 100%;
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fbfdff 0%, #f8fbff 100%);
+    }
+
+    .empty-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef4ff;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .empty-state strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+      color: #111827;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .slot-board-card {
+      margin-bottom: 18px;
+      padding: 22px;
+      border-radius: 28px;
+      border: 1px solid #d8e7fb;
+      background:
+        radial-gradient(circle at top right, rgba(94, 173, 255, 0.16) 0%, rgba(94, 173, 255, 0) 30%),
+        linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(244,248,255,0.98) 100%);
+      box-shadow: 0 22px 44px rgba(30, 90, 168, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .slot-board-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding: 24px 26px;
+      border-radius: 28px;
+      border: 1px solid #d8e7fb;
+      background:
+        radial-gradient(circle at top right, rgba(125, 179, 255, 0.18) 0%, rgba(125, 179, 255, 0) 28%),
+        radial-gradient(circle at bottom left, rgba(244, 193, 67, 0.15) 0%, rgba(244, 193, 67, 0) 26%),
+        linear-gradient(135deg, #ffffff 0%, #f4f8ff 60%, #eef5ff 100%);
+      box-shadow: 0 22px 44px rgba(30, 90, 168, 0.1);
+    }
+
+    .slot-board-title {
+      max-width: 760px;
+    }
+
+    .slot-board-title h3 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      color: #103e7d;
+    }
+
+    .slot-board-title p {
+      margin: 0;
+      color: #4f647f;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .slot-board-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .slot-board-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(30, 90, 168, 0.12);
+      background: rgba(255,255,255,0.84);
+      color: #1e5aa8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .slot-board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .slot-board-copy {
+      max-width: 760px;
+    }
+
+    .slot-board-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: rgba(30, 90, 168, 0.08);
+      color: #1e5aa8;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .slot-board-copy h3 {
+      margin: 0 0 8px;
+      color: #103e7d;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+    }
+
+    .slot-board-copy p {
+      margin: 0;
+      color: #53657d;
+      line-height: 1.6;
+      font-size: 13px;
+      max-width: 520px;
+    }
+
+    .slot-board-controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 12px;
+      width: min(100%, 700px);
+      align-items: end;
+    }
+
+    .slot-board-refresh {
+      width: 100%;
+      min-height: 48px;
+    }
+
+    .slot-board-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .slot-board-stat {
+      padding: 17px;
+      border-radius: 20px;
+      border: 1px solid rgba(216, 227, 240, 0.95);
+      background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,251,255,0.98) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+    }
+
+    .slot-board-stat-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6b7c94;
+      margin-bottom: 10px;
+    }
+
+    .slot-board-stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+      color: #103e7d;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    .slot-board-stat-meta {
+      color: #5d6e84;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .slot-board-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .slot-board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .slot-board-date-btn {
+      width: 100%;
+      border: 1px solid #d8e3f0;
+      border-radius: 22px;
+      padding: 16px;
+      background: rgba(255,255,255,0.94);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .slot-board-date-btn:hover {
+      transform: translateY(-2px);
+      border-color: #b8cfee;
+      box-shadow: 0 16px 28px rgba(30, 90, 168, 0.1);
+    }
+
+    .slot-board-date-btn.is-selected {
+      border-color: #1e5aa8;
+      background: linear-gradient(180deg, #eef5ff 0%, #ffffff 100%);
+      box-shadow: 0 18px 34px rgba(30, 90, 168, 0.16);
+    }
+
+    .slot-board-date-btn.is-low {
+      border-color: #f3cf8d;
+      background: linear-gradient(180deg, #fffdf8 0%, #ffffff 100%);
+    }
+
+    .slot-board-date-btn.is-full {
+      border-color: #fecaca;
+      background: linear-gradient(180deg, #fff7f7 0%, #ffffff 100%);
+    }
+
+    .slot-board-date-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .slot-board-date-label strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: #103e7d;
+      margin-bottom: 6px;
+    }
+
+    .slot-board-date-label span {
+      display: block;
+      font-size: 12px;
+      color: #65758d;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .slot-board-date-summary {
+      text-align: right;
+    }
+
+    .slot-board-date-summary strong {
+      display: block;
+      font-size: 20px;
+      color: #103e7d;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .slot-board-date-summary span {
+      display: block;
+      font-size: 12px;
+      color: #667085;
+      line-height: 1.4;
+    }
+
+    .slot-board-service-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .slot-board-date-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 10px;
+      color: #5d6e84;
+      font-size: 12px;
+    }
+
+    .slot-board-date-meta strong {
+      color: #103e7d;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+    }
+
+    .slot-board-date-meter {
+      position: relative;
+      height: 8px;
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: #e9f0fa;
+      overflow: hidden;
+    }
+
+    .slot-board-date-meter span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1e5aa8 0%, #6ea8ff 100%);
+    }
+
+    .slot-board-date-btn.is-low .slot-board-date-meter span {
+      background: linear-gradient(90deg, #f59e0b 0%, #f9c45b 100%);
+    }
+
+    .slot-board-date-btn.is-full .slot-board-date-meter span {
+      background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+    }
+
+    .slot-board-service-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #f7fbff;
+      color: #234466;
+      font-size: 12px;
+      border: 1px solid rgba(216, 227, 240, 0.88);
+    }
+
+    .slot-board-service-row strong {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .slot-board-service-row span {
+      flex-shrink: 0;
+      font-weight: 800;
+      color: #1e5aa8;
+    }
+
+    .slot-board-service-row.is-low {
+      background: #fff9eb;
+      color: #8a4b04;
+      border-color: #f8ddb1;
+    }
+
+    .slot-board-service-row.is-low span {
+      color: #b45309;
+    }
+
+    .slot-board-service-row.is-full {
+      background: #fff3ec;
+      color: #9a3412;
+      border-color: #fed7c3;
+    }
+
+    .slot-board-service-row.is-full span {
+      color: #c2410c;
+    }
+
+    .slot-board-service-row.is-closed {
+      background: #f8fafc;
+      color: #64748b;
+      border-color: #e2e8f0;
+    }
+
+    .slot-board-service-row.is-closed span {
+      color: #64748b;
+    }
+
+    .slot-board-detail-card {
+      padding: 18px;
+      border-radius: 24px;
+      border: 1px solid #d8e3f0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(249,251,255,0.98) 100%);
+      box-shadow: 0 14px 26px rgba(15, 23, 42, 0.04);
+    }
+
+    .slot-board-detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .slot-board-detail-head h4 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .slot-board-detail-head p {
+      margin: 0;
+      font-size: 13px;
+      color: #667085;
+      line-height: 1.5;
+      max-width: 360px;
+    }
+
+    .slot-board-detail-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eef5ff;
+      color: #1e5aa8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .slot-board-detail-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .slot-board-service-card {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid #dce7f5;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    }
+
+    .slot-board-service-card.is-closed {
+      background: linear-gradient(180deg, #fbfcfd 0%, #f5f7fa 100%);
+    }
+
+    .slot-board-service-card.is-low {
+      background: linear-gradient(180deg, #fffdf8 0%, #ffffff 100%);
+      border-color: #f8ddb1;
+    }
+
+    .slot-board-service-card.is-full {
+      background: linear-gradient(180deg, #fff7f7 0%, #ffffff 100%);
+      border-color: #fecaca;
+    }
+
+    .slot-board-service-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .slot-board-service-card-head h5 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: #111827;
+    }
+
+    .slot-board-service-card-head p {
+      margin: 0;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .slot-board-service-meter {
+      position: relative;
+      height: 8px;
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: #e9f0fa;
+      overflow: hidden;
+    }
+
+    .slot-board-service-meter span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1e5aa8 0%, #6ea8ff 100%);
+    }
+
+    .slot-board-time-chip.is-low {
+      background: #fffaf0;
+    }
+
+    .slot-board-service-card.is-low .slot-board-service-meter span {
+      background: linear-gradient(90deg, #f59e0b 0%, #facc15 100%);
+    }
+
+    .slot-board-service-card.is-full .slot-board-service-meter span {
+      background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+    }
+
+    .slot-board-service-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eef5ff;
+      color: #1e5aa8;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .slot-board-service-card.is-closed .slot-board-service-pill {
+      background: #eef2f7;
+      color: #64748b;
+    }
+
+    .slot-board-time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .slot-board-time-chip {
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid #d8e3f0;
+      background: #ffffff;
+      display: grid;
+      gap: 4px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .slot-board-time-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(30, 90, 168, 0.08);
+    }
+
+    .slot-board-time-chip strong {
+      font-size: 13px;
+      color: #111827;
+    }
+
+    .slot-board-time-chip span {
+      font-size: 12px;
+      color: #1e5aa8;
+      font-weight: 700;
+    }
+
+    .slot-board-time-chip small {
+      font-size: 11px;
+      color: #667085;
+      line-height: 1.45;
+    }
+
+    .slot-board-time-chip.is-low {
+      background: #fffaf0;
+      border-color: #f8ddb1;
+    }
+
+    .slot-board-time-chip.is-low span {
+      color: #b45309;
+    }
+
+    .slot-board-time-chip.is-full {
+      background: #fff4f4;
+      border-color: #fecaca;
+    }
+
+    .slot-board-time-chip.is-full span {
+      color: #b91c1c;
+    }
+
+    .slot-board-time-chip.is-closed {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .slot-board-time-chip.is-closed span {
+      color: #64748b;
+    }
+
+    .slot-board-empty {
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px dashed #c9d6e7;
+      background: rgba(255,255,255,0.9);
+      color: #5f6f85;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .slot-board-page {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .slot-board-page-main,
+    .slot-board-page-side {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .slot-board-hero {
+      padding: 28px;
+      border-radius: 26px;
+      border: 1px solid #d8e7fb;
+      background:
+        radial-gradient(circle at top right, rgba(94, 173, 255, 0.22) 0%, rgba(94, 173, 255, 0) 24%),
+        radial-gradient(circle at bottom left, rgba(244, 193, 67, 0.16) 0%, rgba(244, 193, 67, 0) 28%),
+        linear-gradient(135deg, #fefefe 0%, #f2f8ff 58%, #edf5ff 100%);
+      box-shadow: 0 20px 42px rgba(30, 90, 168, 0.1);
+    }
+
+    .slot-board-hero h3 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      color: #103e7d;
+    }
+
+    .slot-board-hero p {
+      margin: 0;
+      max-width: 760px;
+      color: #4f647f;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    .slot-board-side-card {
+      border-radius: 24px;
+    }
+
+    .slot-board-side-list,
+    .slot-board-side-card .settings-info-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .slot-board-side-card .settings-info-item,
+    .slot-board-side-item {
+      display: grid;
+      gap: 4px;
+      padding: 14px 15px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .slot-board-side-card .settings-info-item strong,
+    .slot-board-side-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #103e7d;
+      font-size: 14px;
+    }
+
+    .slot-board-side-card .settings-info-item span,
+    .slot-board-side-item p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 18px;
+    }
+
+    .settings-card {
+      min-height: 260px;
+    }
+
+    .settings-text {
+      margin-top: 0;
+      margin-bottom: 18px;
+      color: #475467;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .settings-info-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .settings-info-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #fbfdff;
+    }
+
+    .settings-info-item strong {
+      color: #111827;
+      font-size: 14px;
+    }
+
+    .settings-info-item span {
+      color: #667085;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .settings-actions {
+      margin-top: auto;
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: #667085;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+      border: 1px solid var(--border);
+      padding: 24px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .notice {
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      border: 1px solid transparent;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .notice.success {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .notice.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    @media (max-width: 1200px) {
+      .cards,
+      .filters,
+      .form-grid,
+      .settings-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dashboard-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .schedule-admin-intro-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-board-page {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-board-summary {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .slot-board-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .personnel-process-grid,
+      .personnel-process-steps {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        padding-bottom: 14px;
+        min-height: auto;
+      }
+
+      .sidebar-top,
+      .sidebar-footer {
+        gap: 14px;
+      }
+
+      .cards,
+      .filters,
+      .form-grid,
+      .settings-grid,
+      .panel-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .content {
+        padding: 18px;
+      }
+
+      .slot-board-controls,
+      .slot-board-summary,
+      .slot-board-time-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-board-topbar {
+        padding: 22px 20px;
+        align-items: flex-start;
+      }
+
+      .slot-board-title h3 {
+        font-size: 26px;
+      }
+
+      .slot-board-badges {
+        justify-content: flex-start;
+      }
+
+      .slot-board-date-top,
+      .slot-board-service-card-head {
+        flex-direction: column;
+      }
+
+      .slot-board-date-summary {
+        text-align: left;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .actions .btn {
+        flex: 1 1 auto;
+      }
+
+      .metric-value {
+        font-size: 30px;
+      }
+
+      .brand h1 {
+        font-size: 20px;
+      }
+
+      .nav-btn {
+        font-size: 14px;
+        padding: 13px 14px;
+      }
+
+      .dashboard-filter-bar {
+        align-items: stretch;
+      }
+
+      .compact-field {
+        min-width: 100%;
+        max-width: 100%;
+      }
+
+      .panel-title .search-input {
+        max-width: 100%;
+        min-width: 100%;
+        margin-left: 0;
+      }
+
+      .settings-info-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .settings-info-item span {
+        text-align: left;
+      }
+      #dashboardSection,
+#slotBoardSection,
+#bookingsSection,
+#slotsSection,
+#availabilitySection,
+#usersSection,
+#settingsSection {
+  align-self: start;
+}
+
+#bookingsSection .card,
+#slotBoardSection .card,
+#slotsSection .card,
+#availabilitySection .card,
+#usersSection .card,
+#settingsSection .card {
+  margin-top: 0;
+}
+    }
+  
+  .status-cell{display:flex;flex-direction:column;gap:6px}
+  .status-note{font-size:12px;line-height:1.45;color:#667085;max-width:220px}
+  .personnel-help-banner{
+    margin-bottom:16px;
+    padding:14px 16px;
+    border-radius:16px;
+    background:linear-gradient(180deg,#f7fbff 0%,#eef5ff 100%);
+    border:1px solid #dbe7fb;
+    color:#2459a6;
+    line-height:1.6;
+  }
+  .personnel-process-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .personnel-process-steps{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .personnel-process-step{
+    padding:14px 16px;
+    border-radius:16px;
+    border:1px solid var(--border);
+    background:#fbfdff;
+  }
+  .personnel-process-step span{
+    display:block;
+    font-size:12px;
+    color:#667085;
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-weight:700;
+  }
+  .personnel-process-step strong{
+    display:block;
+    color:#111827;
+    font-size:15px;
+  }
+  .personnel-process-step.done{
+    background:#effcf4;
+    border-color:#bbf7d0;
+  }
+  .personnel-process-step.current{
+    background:#eef4ff;
+    border-color:#bfdbfe;
+  }
+  .personnel-stage-card{
+    margin-bottom:18px;
+    padding:16px 18px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  }
+  .personnel-stage-card strong{
+    display:block;
+    margin-bottom:6px;
+    font-size:16px;
+    color:#111827;
+  }
+  .personnel-stage-card p{
+    margin:0;
+    color:#667085;
+    line-height:1.6;
+  }
+  .personnel-guide-list{
+    display:grid;
+    gap:10px;
+    margin-top:14px;
+  }
+  .personnel-guide-item{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:12px 14px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#fbfdff;
+  }
+  .personnel-guide-index{
+    width:26px;
+    height:26px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    background:#eaf2ff;
+    color:var(--primary);
+    font-size:12px;
+    font-weight:700;
+  }
+  .personnel-guide-item div{
+    color:#475467;
+    line-height:1.5;
+  }
+  .btn-danger-soft{
+    background:#fee2e2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+  }
+  .btn-danger-soft:hover{
+    background:#fecaca;
+    transform:translateY(-1px);
+  }
+  .mini-process{
+    background:#eaf2ff;
+    color:#1e5aa8;
+  }
+  .process-actions{
+    justify-content:flex-end;
+  }
+  .process-note{
+    margin-top:8px;
+  }
+  .single-grid{grid-template-columns:1fr}
+  #personnelProcessReason{min-height:110px;resize:vertical}
+</style>
+</head>
+<body>
+  <div id="adminApp" class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="brand">
+          <img src="logo-psa.png" alt="PSA logo">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p>National ID Appointment System</p>
+          </div>
+        </div>
+
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-top">
+            <div class="sidebar-user-copy">
+              <div class="sidebar-user-kicker">Signed In Personnel</div>
+              <div class="sidebar-user-block">
+                <span class="sidebar-user-name-label">Personnel Name</span>
+                <div class="sidebar-user-name">
+                  <span class="sidebar-user-name-value" id="sidebarUserGreeting">User</span>
+                </div>
+              </div>
+              <div class="sidebar-user-block">
+                <span class="sidebar-user-name-label">Designation</span>
+                <div class="sidebar-user-role" id="sidebarUserRole">Registration Kit Operator</div>
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-user-actions">
+            <div class="sidebar-user-status">Session Active</div>
+            <button class="sidebar-logout-btn" id="sidebarLogoutBtn" type="button">
+              <span class="nav-icon">↩</span>
+              <span class="sidebar-logout-label">
+                <strong>Log Out</strong>
+                <span>End this session</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <div class="sidebar-section-label">Workspace</div>
+          <button class="nav-btn active" data-section="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </button>
+
+          <button class="nav-btn" data-section="bookings">
+            <span class="nav-icon">📋</span>
+            <span>Bookings</span>
+          </button>
+
+          <button class="nav-btn" data-section="liveSlots">
+            <span class="nav-icon">📡</span>
+            <span>Live Slots</span>
+          </button>
+
+          <button class="nav-btn" data-section="slots">
+            <span class="nav-icon">🗓️</span>
+            <span>Schedule Controls</span>
+          </button>
+
+          <button class="nav-btn" data-section="users">
+            <span class="nav-icon">👥</span>
+            <span>Users</span>
+          </button>
+
+          <button class="nav-btn" data-section="settings">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div class="title-wrap">
+          <h2 id="sectionTitle">Dashboard Overview</h2>
+          <p>Review appointments, update records, and manage available slots.</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="refreshBtn">Refresh Data</button>
+          <button class="btn btn-primary" id="openNewBookingBtn">Add Booking</button>
+        </div>
+      </div>
+
+      <div id="notice" class="notice"></div>
+
+      <section id="dashboardSection" class="dashboard-shell">
+        <div class="dashboard-left">
+          <div class="card dashboard-filter-card">
+            <div class="dashboard-filter-bar">
+              <div>
+                <h3>Dashboard Date Filter</h3>
+                <p>Choose a date to view booking totals and service breakdown.</p>
+              </div>
+
+              <div class="field compact-field">
+                <label for="dashboardDate">Select Date</label>
+                <input type="date" id="dashboardDate" />
+              </div>
+            </div>
+          </div>
+
+          <div class="cards dashboard-metrics">
+            <div class="card metric-card metric-total">
+              <div class="metric-label">Total Bookings</div>
+              <div class="metric-value" id="metricTotal">0</div>
+              <div class="metric-sub">All fetched records</div>
+            </div>
+
+            <div class="card metric-card metric-today">
+              <div class="metric-label">Selected Date</div>
+              <div class="metric-value" id="metricToday">0</div>
+              <div class="metric-sub">Total bookings for chosen date</div>
+            </div>
+
+            <div class="card metric-card metric-pending">
+              <div class="metric-label">Pending</div>
+              <div class="metric-value" id="metricPending">0</div>
+              <div class="metric-sub">Need review or confirmation</div>
+            </div>
+
+            <div class="card metric-card metric-slots">
+              <div class="metric-label">Available Slot Rules</div>
+              <div class="metric-value" id="metricSlots">0</div>
+              <div class="metric-sub">Configured custom slot entries</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">
+              <h3>Recent Bookings</h3>
+              <input class="search-input" id="quickSearch" placeholder="Search name, reference, email..." />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Name</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recentBookingsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-right">
+          <div class="card dashboard-right-top">
+            <div class="panel-title">
+              <h3>Bookings by Service</h3>
+            </div>
+            <div id="serviceBreakdown" class="slot-list service-breakdown"></div>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">
+              <h3>Quick Slot Update</h3>
+            </div>
+            <div class="field">
+              <label for="quickService">Service</label>
+              <select id="quickService"></select>
+            </div>
+            <div class="field">
+              <label for="quickDate">Date</label>
+              <input type="date" id="quickDate" />
+            </div>
+            <div class="field">
+              <label for="quickSlots">Available Slots</label>
+              <input type="number" id="quickSlots" min="0" />
+            </div>
+            <button class="btn btn-primary" id="saveQuickSlotBtn">Save Slot Rule</button>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">
+              <h3>Custom Slot Rules</h3>
+            </div>
+            <div class="slot-list" id="dashboardSlotList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="slotBoardSection" class="hidden">
+        <div class="slot-board-page">
+          <div class="slot-board-page-main">
+            <div class="slot-board-topbar">
+              <div class="slot-board-title">
+                <div class="slot-board-kicker">Live availability</div>
+                <h3>Live Schedule Board</h3>
+                <p>Open dates, remaining capacity, and time windows in one clean workspace.</p>
+              </div>
+              <div class="slot-board-badges">
+                <span class="slot-board-badge">Realtime</span>
+                <span class="slot-board-badge">Synced to Bookings</span>
+              </div>
+            </div>
+
+            <div class="slot-board-card">
+              <div class="slot-board-header">
+                <div class="slot-board-copy">
+                  <div class="slot-board-kicker">Schedule</div>
+                  <h3>Open Dates</h3>
+                  <p>Pick a date to inspect services and time windows.</p>
+                </div>
+
+                <div class="slot-board-controls">
+                  <div class="field">
+                    <label for="slotBoardMonth">Month</label>
+                    <select id="slotBoardMonth"></select>
+                  </div>
+                  <div class="field">
+                    <label for="slotBoardService">Service</label>
+                    <select id="slotBoardService"></select>
+                  </div>
+                  <div class="field">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary slot-board-refresh" id="slotBoardRefreshBtn" type="button">Refresh</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="slot-board-summary" id="slotBoardSummary"></div>
+
+              <div class="slot-board-layout">
+                <div id="slotBoardGrid" class="slot-board-grid"></div>
+                <div id="slotBoardDetail" class="slot-board-detail-card"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slot-board-page-side">
+            <div class="card slot-board-side-card">
+              <div class="panel-title">
+                <h3>Current View</h3>
+              </div>
+              <div class="settings-info-list">
+                <div class="settings-info-item">
+                  <strong>Month</strong>
+                  <span id="slotBoardFocusMonth">--</span>
+                </div>
+                <div class="settings-info-item">
+                  <strong>Service</strong>
+                  <span id="slotBoardFocusService">All services</span>
+                </div>
+                <div class="settings-info-item">
+                  <strong>Focus Date</strong>
+                  <span id="slotBoardFocusDate">No date selected</span>
+                </div>
+                <div class="settings-info-item">
+                  <strong>Free Slots</strong>
+                  <span id="slotBoardFocusRemaining">--</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card slot-board-side-card">
+              <div class="panel-title">
+                <h3>Status Guide</h3>
+              </div>
+              <div class="slot-board-side-list">
+                <div class="slot-board-side-item">
+                  <strong>Open</strong>
+                  <p>Healthy remaining capacity.</p>
+                </div>
+                <div class="slot-board-side-item">
+                  <strong>Low</strong>
+                  <p>Slots are running down.</p>
+                </div>
+                <div class="slot-board-side-item">
+                  <strong>Full or closed</strong>
+                  <p>No available capacity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="bookingsSection" class="hidden">
+        <div class="card">
+          <div class="panel-title">
+            <h3>Booking Records</h3>
+          </div>
+
+          <div id="personnelHelpBanner" class="personnel-help-banner hidden">
+            Use the <strong>Process</strong> button to check in the client, start the service, and record the final result in one guided flow. Open <strong>Live Slots</strong> in the sidebar to review open schedules first, and switch <strong>Record Scope</strong> to search archived schedules when needed.
+          </div>
+
+          <div class="filters">
+            <div class="field">
+              <label for="filterService">Service</label>
+              <select id="filterService"></select>
+            </div>
+            <div class="field">
+              <label for="filterStatus">Status</label>
+              <select id="filterStatus">
+                <option value="">All statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Arrived">Arrived</option>
+                <option value="Assisted">Assisted</option>
+                <option value="Completed">Completed</option>
+                <option value="Not Successful">Not Successful</option>
+                <option value="No Show">No Show</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Confirmed">Confirmed</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filterScope">Record Scope</label>
+              <select id="filterScope">
+                <option value="active">Active records</option>
+                <option value="archived">Archived records</option>
+                <option value="all">All records</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filterDate">Date</label>
+              <input type="date" id="filterDate" />
+            </div>
+            <div class="field">
+              <label for="filterSearch">Search</label>
+              <input type="text" id="filterSearch" placeholder="Name, reference, contact" />
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button class="btn btn-secondary" id="clearFiltersBtn">Clear Filters</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Name</th>
+                  <th>Service</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Record</th>
+                  <th>Assisted By</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="slotsSection" class="hidden">
+        <div class="schedule-admin-shell">
+          <div class="card schedule-admin-intro">
+            <div class="panel-title">
+              <h3>Schedule Controls</h3>
+            </div>
+            <div class="schedule-admin-intro-grid">
+              <div class="schedule-admin-intro-card">
+                <span>Slot Management</span>
+                <strong>Set the exact number of bookable slots.</strong>
+                <p>Add or edit slot rules per service and date when you need more or fewer appointments than the default daily capacity.</p>
+              </div>
+              <div class="schedule-admin-intro-card">
+                <span>Date Availability</span>
+                <strong>Open or close appointment dates.</strong>
+                <p>Use availability rules only to allow or block appointments for a specific date. Slot counts are managed separately above.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-grid">
+            <div class="card">
+              <div class="panel-title">
+                <h3>Slot Management</h3>
+                <button class="btn btn-primary" id="openSlotModalBtn">Add Slot Rule</button>
+              </div>
+              <p class="schedule-admin-note">Choose the service, date, and exact number of slots the admin wants to make available.</p>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Service</th>
+                      <th>Available Slots</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="slotsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="panel-title">
+                <h3>Default Slot Limits</h3>
+              </div>
+              <div class="slot-list" id="defaultSlotList"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">
+              <h3>Date Availability</h3>
+              <button class="btn btn-primary" id="openAvailabilityModalBtn">Add Availability Rule</button>
+            </div>
+            <p class="schedule-admin-note">Use this table only to open or close selected dates. It does not change the number of slots for a service.</p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="availabilityTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settingsSection" class="hidden">
+        <div class="settings-grid">
+          <div class="card settings-card">
+            <div class="panel-title">
+              <h3>System Settings</h3>
+            </div>
+
+            <p class="settings-text">
+              This admin dashboard is connected to the personnel login page and Google Apps Script backend.
+            </p>
+
+            <div class="settings-info-list">
+              <div class="settings-info-item">
+                <strong>Access Control</strong>
+                <span>Authorized personnel only</span>
+              </div>
+
+              <div class="settings-info-item">
+                <strong>Data Source</strong>
+                <span>Google Sheets Appointment Database</span>
+              </div>
+
+              <div class="settings-info-item">
+                <strong>Dashboard Mode</strong>
+                <span>Live Admin View</span>
+              </div>
+              <div class="settings-info-item">
+                <strong>Backend Version</strong>
+                <span id="backendVersionLabel">Loading...</span>
+              </div>
+
+              <div class="settings-info-item">
+                <strong>Archived Records</strong>
+                <span id="archiveCountLabel">Loading...</span>
+              </div>
+
+              <div class="settings-info-item">
+                <strong>Saturday Booking</strong>
+                <span id="saturdayBookingLabel">Loading...</span>
+              </div>
+
+              <div class="settings-info-item">
+                <strong>Sunday Booking</strong>
+                <span id="sundayBookingLabel">Loading...</span>
+              </div>
+
+              <div class="settings-info-item">
+                <strong>Booking Window</strong>
+                <span id="bookingWindowLabel">Loading...</span>
+              </div>
+            </div>
+
+            <div class="field" style="margin-bottom:16px;">
+              <label for="saturdayBookingToggle">Saturday Booking</label>
+              <select id="saturdayBookingToggle">
+                <option value="false">OFF</option>
+                <option value="true">ON</option>
+              </select>
+            </div>
+
+            <div class="field" style="margin-bottom:16px;">
+              <label for="sundayBookingToggle">Sunday Booking</label>
+              <select id="sundayBookingToggle">
+                <option value="false">OFF</option>
+                <option value="true">ON</option>
+              </select>
+            </div>
+
+            <div class="field" style="margin-bottom:16px;">
+              <label for="bookingWindowMonths">Booking Window</label>
+              <select id="bookingWindowMonths">
+                <option value="1">Current month only</option>
+                <option value="2">Current + next month</option>
+                <option value="3">Current + 2 months</option>
+                <option value="4">Current + 3 months</option>
+              </select>
+            </div>
+
+            <div class="row-actions" style="margin-bottom:16px;">
+              <button class="btn btn-primary" id="saveWeekendSettingBtn">Save Weekend Setting</button>
+            </div>
+
+            <div class="empty-state" style="margin-bottom:16px;">
+              <div class="empty-icon">🗂️</div>
+              <div>
+                <strong>Archive Past Bookings</strong>
+                <p>Move all bookings before the selected date into the <code>Appointments Archive</code> sheet before removing them from the live appointments list.</p>
+              </div>
+            </div>
+
+            <div class="field" style="margin-bottom:12px;">
+              <label for="archiveBeforeDate">Archive records before</label>
+              <input type="date" id="archiveBeforeDate" />
+              <div class="hint-text">All bookings dated before the selected date are moved, regardless of status.</div>
+            </div>
+
+            <div class="row-actions" style="margin-bottom:16px;">
+              <button class="btn btn-secondary" id="archivePastBookingsBtn">Archive Past Records</button>
+            </div>
+
+            <div class="empty-state" style="margin-bottom:16px;">
+              <div class="empty-icon">🧹</div>
+              <div>
+                <strong>Clean Duplicate Bookings</strong>
+                <p>Scan the live <code>Appointments</code> sheet, move later duplicate active bookings into <code>Duplicate Booking Attempts</code>, and keep only the earliest scheduled booking in the live list.</p>
+              </div>
+            </div>
+
+            <div class="row-actions" style="margin-bottom:16px;">
+              <button class="btn btn-secondary" id="cleanupDuplicateBookingsBtn">Move Duplicates Out</button>
+            </div>
+
+            <div class="settings-actions">
+              <button class="btn btn-secondary" id="logoutBtn">Log Out</button>
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <div class="panel-title">
+              <h3>Admin Notes</h3>
+            </div>
+            <div class="empty-state">
+              <div class="empty-icon">🛡️</div>
+              <div>
+                <strong>System Ready</strong>
+                <p>Use this dashboard to manage bookings, adjust slot rules, monitor daily service demand, and control weekend booking access.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="usersSection" class="hidden">
+        <div class="card">
+          <div class="panel-title">
+            <h3>User Management</h3>
+            <button class="btn btn-primary" id="openUserModalBtn">New User</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Username</th>
+                  <th>Title</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="userModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="userModalTitle">Create User</h3>
+        <button class="btn btn-secondary" data-close="userModal">Close</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label for="userFullName">Full Name</label>
+          <input id="userFullName" type="text" />
+        </div>
+
+        <div class="field full">
+          <label for="userTitle">Title / Position</label>
+          <input id="userTitle" type="text" placeholder="Registration Kit Operator" />
+        </div>
+
+        <div class="field">
+          <label for="userUsername">Username</label>
+          <input id="userUsername" type="text" />
+        </div>
+
+        <div class="field">
+          <label for="userPassword">Password</label>
+          <input id="userPassword" type="password" />
+          <div class="hint-text" id="userPasswordHint">Enter a password.</div>
+        </div>
+
+        <div class="field">
+          <label for="userRole">Role</label>
+          <select id="userRole">
+            <option value="personnel">personnel</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="userStatus">Status</label>
+          <select id="userStatus">
+            <option value="active">active</option>
+            <option value="inactive">inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-close="userModal">Cancel</button>
+        <button class="btn btn-primary" id="saveUserBtn">Save User</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="bookingModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="bookingModalTitle">Add Booking</h3>
+        <button class="btn btn-secondary" data-close="bookingModal">Close</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="bookingRef">Reference</label>
+          <input id="bookingRef" type="text" placeholder="Auto or manual reference" />
+        </div>
+        <div class="field">
+          <label for="bookingStatus">Status</label>
+          <select id="bookingStatus">
+            <option>Confirmed</option>
+            <option>Pending</option>
+            <option>Arrived</option>
+            <option>Assisted</option>
+            <option>Completed</option>
+            <option>No Show</option>
+            <option>Cancelled</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="bookingName">Full Name</label>
+          <input id="bookingName" type="text" />
+        </div>
+        <div class="field">
+          <label for="bookingService">Service</label>
+          <select id="bookingService"></select>
+        </div>
+        <div class="field">
+          <label for="bookingDate">Date</label>
+          <input id="bookingDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="bookingTime">Time</label>
+          <select id="bookingTime">
+            <option value="">-- Select Time --</option>
+            <option>8:00 AM</option>
+            <option>9:00 AM</option>
+            <option>10:00 AM</option>
+            <option>11:00 AM</option>
+            <option>1:00 PM</option>
+            <option>2:00 PM</option>
+            <option>3:00 PM</option>
+            <option>4:00 PM</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="bookingEmail">Email</label>
+          <input id="bookingEmail" type="email" />
+        </div>
+        <div class="field">
+          <label for="bookingPhone">Phone</label>
+          <input id="bookingPhone" type="text" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-close="bookingModal">Cancel</button>
+        <button class="btn btn-primary" id="saveBookingBtn">Save Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="slotModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="slotModalTitle">Add Slot Rule</h3>
+        <button class="btn btn-secondary" data-close="slotModal">Close</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="slotDate">Date</label>
+          <input id="slotDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="slotService">Service</label>
+          <select id="slotService"></select>
+        </div>
+        <div class="field full">
+          <label for="slotCount">Available Slots</label>
+          <input id="slotCount" type="number" min="0" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-close="slotModal">Cancel</button>
+        <button class="btn btn-primary" id="saveSlotBtn">Save Slot Rule</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="availabilityModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="availabilityModalTitle">Add Date Availability</h3>
+        <button class="btn btn-secondary" data-close="availabilityModal">Close</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="availabilityDate">Date</label>
+          <input type="date" id="availabilityDate">
+        </div>
+
+        <div class="field">
+          <label for="availabilityStatus">Status</label>
+          <select id="availabilityStatus">
+            <option value="OPEN">OPEN</option>
+            <option value="CLOSED">CLOSED</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="availabilityReason">Reason</label>
+          <input type="text" id="availabilityReason" placeholder="Holiday, maintenance, local event, etc.">
+          <div class="hint-text">Use slot management for the number of slots. Availability only opens or closes the selected date.</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-close="availabilityModal">Cancel</button>
+        <button class="btn btn-primary" id="saveAvailabilityBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="archiveConfirmModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Confirm Archive</h3>
+        <button class="btn btn-secondary" data-close="archiveConfirmModal">Close</button>
+      </div>
+
+      <p class="settings-text" style="margin-bottom:16px;">
+        Review the archive summary below before moving old bookings out of the live Appointments sheet.
+      </p>
+
+      <div class="settings-info-list" style="margin-bottom:16px;">
+        <div class="settings-info-item">
+          <strong>Cutoff Date</strong>
+          <span id="archiveConfirmDate">—</span>
+        </div>
+
+        <div class="settings-info-item">
+          <strong>Records To Archive</strong>
+          <span id="archiveConfirmPreviewCount">0</span>
+        </div>
+
+        <div class="settings-info-item">
+          <strong>Current Archive Count</strong>
+          <span id="archiveConfirmCurrentCount">0</span>
+        </div>
+
+        <div class="settings-info-item">
+          <strong>Archive Count After Move</strong>
+          <span id="archiveConfirmAfterCount">0</span>
+        </div>
+      </div>
+
+      <div class="hint-text">
+        This will move the matching records into <code>Appointments Archive</code> and remove them from the live <code>Appointments</code> sheet.
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-close="archiveConfirmModal">Cancel</button>
+        <button class="btn btn-primary" id="confirmArchiveBtn">Archive Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const EXEC_URL = "https://script.google.com/macros/s/AKfycbwX5tgcvZtl3BPQ7RtCPn6EoLKx2GBxCG6zEbUlWIsabKeJfEwFH5XusI6Vu8B145Wf3g/exec";
+
+let username = sessionStorage.getItem("nid_username") || "";
+let sessionToken = sessionStorage.getItem("nid_session_token") || "";
+let sessionExpiresAt = Number(sessionStorage.getItem("nid_session_expires") || 0);
+let userRole = sessionStorage.getItem("nid_role") || "";
+let displayName = sessionStorage.getItem("nid_name") || "";
+let userTitle = sessionStorage.getItem("nid_title") || "";
+
+let bookings = [];
+let archivedBookings = [];
+let slotRules = [];
+let availabilityRules = [];
+let users = [];
+let archiveRecordCount = 0;
+const LIVE_BOOKING_SOURCE = "Appointments";
+const ARCHIVED_BOOKING_SOURCE = "Appointments Archive";
+let weekendSettings = {
+  apiVersion: "Unknown",
+  saturdayOpen: false,
+  sundayOpen: false,
+  bookingWindowMonths: 1
+};
+let archivePreviewState = {
+  beforeDate: "",
+  previewCount: 0,
+  archiveCount: 0,
+  archiveCountAfter: 0,
+  archiveSheet: "Appointments Archive"
+};
+let slotBoardState = {
+  month: "",
+  service: "",
+  selectedDate: "",
+  monthlyDates: [],
+  detailServices: [],
+  loading: false,
+  detailLoading: false
+};
+let activePersonnelProcessRef = "";
+let activePersonnelProcessSource = "";
+
+let editingBookingRef = null;
+let editingBookingSource = LIVE_BOOKING_SOURCE;
+let editingSlotKey = null;
+let editingUsername = null;
+
+const services = [
+  "National ID Registration",
+  "Correction/Updating of Demographic Information",
+  "Request National ID in Paper Format (ePhilID)",
+  "Retrieval of TRN / Other Concern"
+];
+
+const defaultSlots = {
+  "National ID Registration": 32,
+  "Correction/Updating of Demographic Information": 16,
+  "Request National ID in Paper Format (ePhilID)": 50,
+  "Retrieval of TRN / Other Concern": 50
+};
+
+const personnelServiceGuides = {
+  "National ID Registration": {
+    title: "Registration Flow",
+    intro: "Use this when the client is completing a new National ID registration.",
+    successLabel: "Complete Registration",
+    steps: [
+      "Verify the client identity and scheduled booking details.",
+      "Confirm the required demographic information and supporting documents.",
+      "Assist the client through capture or registration steps until submission is complete.",
+      "Record the booking as completed only after the registration process is fully finished."
+    ]
+  },
+  "Correction/Updating of Demographic Information": {
+    title: "Demographic Update Flow",
+    intro: "Use this when the client needs to correct or update an existing National ID record.",
+    successLabel: "Complete Update",
+    steps: [
+      "Confirm which demographic field needs to be corrected or updated.",
+      "Check the supporting documents before starting the update.",
+      "Assist the client through the correction or update process.",
+      "Mark the booking as completed once the requested update has been processed."
+    ]
+  },
+  "Request National ID in Paper Format (ePhilID)": {
+    title: "ePhilID Printing Flow",
+    intro: "Use this when the client is requesting a printed paper-format National ID.",
+    successLabel: "Complete Printing",
+    steps: [
+      "Confirm the client record can be retrieved for ePhilID printing.",
+      "Verify the client details before printing.",
+      "Complete the printing or release process and check that the output is usable.",
+      "Record a not successful outcome if the record cannot be retrieved or printing cannot be completed."
+    ]
+  },
+  "Retrieval of TRN / Other Concern": {
+    title: "TRN / Other Concern Flow",
+    intro: "Use this when the client needs TRN retrieval or another service desk concern resolved.",
+    successLabel: "Complete Concern",
+    steps: [
+      "Confirm the exact concern the client is raising.",
+      "Retrieve the needed record or provide the appropriate service desk assistance.",
+      "If the concern must be referred or cannot be finished today, capture the reason clearly.",
+      "Mark the booking as completed only after the requested concern has been resolved."
+    ]
+  }
+};
+
+const sectionMap = {
+  dashboard: ["dashboardSection", "Dashboard Overview", "Review appointments, update records, and manage available slots."],
+  liveSlots: ["slotBoardSection", "Live Schedule Board", "Open dates, remaining capacity, and time windows in one clean view."],
+  bookings: ["bookingsSection", "Booking Management", "Check in clients, guide the service flow, and record the final result from one process modal."],
+  slots: ["slotsSection", "Schedule Controls", "Set custom slot counts by service and date, then open or close specific appointment dates."],
+  users: ["usersSection", "User Management", "Maintain personnel accounts, access levels, and account status."],
+  settings: ["settingsSection", "System Settings", "Control weekend booking rules, booking window, and archive behavior."]
+};
+
+function clearStoredSession() {
+  sessionStorage.removeItem("nid_session_token");
+  sessionStorage.removeItem("nid_session_expires");
+  sessionStorage.removeItem("nid_username");
+  sessionStorage.removeItem("nid_role");
+  sessionStorage.removeItem("nid_name");
+  sessionStorage.removeItem("nid_title");
+}
+
+function requireLogin() {
+  if (!sessionToken) {
+    window.location.href = "login.html";
+    return false;
+  }
+
+  if (sessionExpiresAt && Date.now() >= sessionExpiresAt) {
+    clearStoredSession();
+    window.location.href = "login.html";
+    return false;
+  }
+
+  return true;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function normalizeResponse(response) {
+  if (!response || typeof response !== "object") return response;
+
+  const wrapper = response.result || response.data || response.payload || response.body;
+  if (wrapper && typeof wrapper === "object" && !Array.isArray(wrapper)) {
+    return normalizeResponse(wrapper);
+  }
+
+  return response;
+}
+
+function showNotice(message, type = "success", targetId = "notice") {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+
+  el.className = `notice show ${type}`;
+  el.textContent = message;
+  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  setTimeout(() => {
+    el.className = "notice";
+    el.textContent = "";
+  }, 3000);
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.add("open");
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.remove("open");
+
+  if (id === "personnelProcessModal") {
+    resetPersonnelProcessModal();
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const parts = String(dateStr).split("-");
+  if (parts.length !== 3) return dateStr;
+
+  const year = parts[0];
+  const monthIndex = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+
+  if (monthIndex < 0 || monthIndex > 11 || isNaN(day)) return dateStr;
+
+  return `${day} ${months[monthIndex]} ${year}`;
+}
+
+function formatTime(timeValue) {
+  if (!timeValue) return "—";
+
+  const str = String(timeValue).trim();
+
+  if (/^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(str)) {
+    const match = str.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
+    const hour = String(parseInt(match[1], 10)).padStart(2, "0");
+    const minute = match[2];
+    const meridian = match[3].toUpperCase();
+    return `${hour}:${minute} ${meridian}`;
+  }
+
+  return str;
+}
+
+function getTodayIso() {
+  const now = new Date();
+  const localTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+  return localTime.toISOString().slice(0, 10);
+}
+
+function getMonthValueFromDate(dateStr) {
+  return String(dateStr || "").slice(0, 7);
+}
+
+function formatMonthLabel(monthValue) {
+  if (!/^\d{4}-\d{2}$/.test(String(monthValue || ""))) return monthValue || "—";
+
+  const [year, month] = String(monthValue).split("-").map(Number);
+  const monthDate = new Date(year, month - 1, 1);
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric"
+  }).format(monthDate);
+}
+
+function formatWeekdayLabel(dateStr) {
+  const parsed = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(parsed.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short"
+  }).format(parsed);
+}
+
+function formatCompactServiceName(service) {
+  if (service === "National ID Registration") return "Registration";
+  if (service === "Correction/Updating of Demographic Information") return "Correction";
+  if (service === "Request National ID in Paper Format (ePhilID)") return "ePhilID";
+  if (service === "Retrieval of TRN / Other Concern") return "TRN / Concern";
+  return service;
+}
+
+function badgeClass(status) {
+  if (status === "Cancelled" || status === "No Show" || status === "Not Successful") return "badge badge-cancelled";
+  if (status === "Pending" || status === "Arrived" || status === "Assisted") return "badge badge-pending";
+  if (status === "Completed" || status === "Successful") return "badge badge-confirmed";
+  return "badge badge-confirmed";
+}
+
+function canEditBookings() {
+  return userRole === "admin";
+}
+
+function isAdmin() {
+  return userRole === "admin";
+}
+
+function isTerminalBookingStatus(status) {
+  return ["Completed", "Cancelled", "No Show", "Not Successful"].includes(String(status || "").trim());
+}
+
+function getPersonnelServiceGuide(service) {
+  return personnelServiceGuides[service] || {
+    title: "Service Flow",
+    intro: "Review the client request, complete the service steps, and record the final result.",
+    successLabel: "Mark Successful",
+    steps: [
+      "Confirm the client details and requested service.",
+      "Assist the client according to the service desk procedure.",
+      "Record the final outcome once the interaction is complete."
+    ]
+  };
+}
+
+function fillServiceOptions() {
+  const ids = ["quickService", "filterService", "bookingService", "slotService", "slotBoardService"];
+
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const includeAll = id === "filterService" || id === "slotBoardService";
+    el.innerHTML = includeAll ? `<option value="">All services</option>` : "";
+
+    services.forEach(service => {
+      const option = document.createElement("option");
+      option.value = service;
+      option.textContent = service;
+      el.appendChild(option);
+    });
+  });
+}
+
+function switchSection(section) {
+  if (!sectionMap[section]) return;
+
+  Object.values(sectionMap).forEach(([id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
+
+  const [sectionId, sectionTitle, sectionDescription] = sectionMap[section];
+  document.getElementById(sectionId).classList.remove("hidden");
+  document.getElementById("sectionTitle").textContent = sectionTitle;
+  const sectionDescEl = document.querySelector(".title-wrap p");
+  if (sectionDescEl) {
+    sectionDescEl.textContent = sectionDescription;
+  }
+
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  document.querySelector(`.nav-btn[data-section="${section}"]`)?.classList.add("active");
+}
+
+function normalizeBookingSource(sourceSheet) {
+  return String(sourceSheet || "").trim().toLowerCase() === ARCHIVED_BOOKING_SOURCE.toLowerCase()
+    ? ARCHIVED_BOOKING_SOURCE
+    : LIVE_BOOKING_SOURCE;
+}
+
+function normalizeBookingItem(item) {
+  if (!item || typeof item !== "object") return item;
+
+  return {
+    ...item,
+    sourceSheet: normalizeBookingSource(item.sourceSheet)
+  };
+}
+
+function getBookingsForScope(scope = "active") {
+  const normalizedScope = String(scope || "").trim().toLowerCase();
+
+  if (normalizedScope === "archived") {
+    return archivedBookings.slice();
+  }
+
+  if (normalizedScope === "all") {
+    return [...bookings, ...archivedBookings].sort(compareBookingsForDisplay);
+  }
+
+  return bookings.slice();
+}
+
+function findBookingByRef(refCode, sourceSheet = "") {
+  const cleanRef = String(refCode || "").trim();
+  if (!cleanRef) return null;
+
+  const normalizedSource = String(sourceSheet || "").trim();
+  if (normalizedSource) {
+    const targetList = normalizeBookingSource(normalizedSource) === ARCHIVED_BOOKING_SOURCE
+      ? archivedBookings
+      : bookings;
+
+    return targetList.find(item => String(item?.refCode || "").trim() === cleanRef) || null;
+  }
+
+  return getBookingsForScope("all").find(item => String(item?.refCode || "").trim() === cleanRef) || null;
+}
+
+function bookingRecordLabel(sourceSheet) {
+  return normalizeBookingSource(sourceSheet) === ARCHIVED_BOOKING_SOURCE ? "Archived" : "Active";
+}
+
+function bookingRecordBadgeClass(sourceSheet) {
+  return normalizeBookingSource(sourceSheet) === ARCHIVED_BOOKING_SOURCE
+    ? "badge badge-record-archived"
+    : "badge badge-record-live";
+}
+
+function applyBookingFilters() {
+  const service = document.getElementById("filterService")?.value || "";
+  const status = document.getElementById("filterStatus")?.value || "";
+  const scope = document.getElementById("filterScope")?.value || "active";
+  const date = document.getElementById("filterDate")?.value || "";
+  const search = (document.getElementById("filterSearch")?.value || "").trim().toLowerCase();
+
+  return getBookingsForScope(scope).filter(item => {
+    const haystack = [
+      item.refCode,
+      item.fullname,
+      item.email,
+      item.phone,
+      item.time,
+      item.assistedBy,
+      bookingRecordLabel(item.sourceSheet)
+    ].join(" ").toLowerCase();
+
+    return (!service || item.service === service) &&
+           (!status || item.status === status) &&
+           (!date || item.date === date) &&
+           (!search || haystack.includes(search));
+  });
+}
+
+function filterQuickSearch() {
+  const q = (document.getElementById("quickSearch")?.value || "").trim().toLowerCase();
+  if (!q) return bookings;
+
+  return bookings.filter(item => {
+    const haystack = [
+      item.refCode,
+      item.fullname,
+      item.email,
+      item.phone,
+      item.time,
+      item.assistedBy
+    ].join(" ").toLowerCase();
+
+    return haystack.includes(q);
+  });
+}
+
+function renderMetrics() {
+  const selectedDate = document.getElementById("dashboardDate")?.value || new Date().toISOString().slice(0, 10);
+  const bookingsForDate = bookings.filter(b => b.date === selectedDate);
+  const pendingForDate = bookingsForDate.filter(b => b.status === "Pending");
+
+  const metricTotal = document.getElementById("metricTotal");
+  const metricToday = document.getElementById("metricToday");
+  const metricPending = document.getElementById("metricPending");
+  const metricSlots = document.getElementById("metricSlots");
+
+  if (metricTotal) metricTotal.textContent = bookings.length;
+  if (metricToday) metricToday.textContent = bookingsForDate.length;
+  if (metricPending) metricPending.textContent = pendingForDate.length;
+  if (metricSlots) metricSlots.textContent = slotRules.length;
+
+  const breakdownEl = document.getElementById("serviceBreakdown");
+  if (!breakdownEl) return;
+
+  breakdownEl.innerHTML = "";
+
+  const counts = {
+    "National ID Registration": 0,
+    "Correction/Updating of Demographic Information": 0,
+    "Request National ID in Paper Format (ePhilID)": 0,
+    "Retrieval of TRN / Other Concern": 0
+  };
+
+  bookingsForDate.forEach(b => {
+    if (counts.hasOwnProperty(b.service)) {
+      counts[b.service]++;
+    }
+  });
+
+  Object.entries(counts).forEach(([service, count]) => {
+    const div = document.createElement("div");
+    div.className = "slot-item";
+    div.innerHTML = `
+      <div>
+        <strong>${escapeHtml(service)}</strong>
+        <div class="slot-meta">Selected date: ${escapeHtml(formatDate(selectedDate))}</div>
+      </div>
+      <span class="slot-pill">${count} booking${count !== 1 ? "s" : ""}</span>
+    `;
+    breakdownEl.appendChild(div);
+  });
+}
+
+function renderRecentBookings(list = bookings) {
+  const tbody = document.getElementById("recentBookingsBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  list.slice(0, 6).forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(item.refCode)}</td>
+      <td>${escapeHtml(item.fullname)}</td>
+      <td>${escapeHtml(item.service)}</td>
+      <td>${escapeHtml(formatDate(item.date))}</td>
+      <td>${escapeHtml(formatTime(item.time))}</td>
+      <td>
+        <div class="status-cell">
+          <span class="${badgeClass(item.status)}">${escapeHtml(item.status)}</span>
+          ${item.outcomeReason ? `<div class="status-note">${escapeHtml(item.outcomeReason)}</div>` : ""}
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!tbody.innerHTML) {
+    tbody.innerHTML = `<tr><td colspan="6">No booking records match the selected filters.</td></tr>`;
+  }
+}
+
+function actionButtonHtml(label, className, dataAttrs = {}) {
+  const attrs = Object.entries(dataAttrs)
+    .map(([key, value]) => `${key}="${escapeHtml(value)}"`)
+    .join(" ");
+
+  return `<button class="${className}" type="button" ${attrs}>${escapeHtml(label)}</button>`;
+}
+
+function getPersonnelActionButtons(item) {
+  const label = isTerminalBookingStatus(item.status) ? "View" : "Process";
+  const buttonClass = isTerminalBookingStatus(item.status) ? "mini-btn mini-edit" : "mini-btn mini-process";
+  return `
+    <div class="row-actions">
+      ${actionButtonHtml(label, buttonClass, {
+        "data-row-action": "open-process",
+        "data-ref-code": item.refCode,
+        "data-source-sheet": normalizeBookingSource(item.sourceSheet)
+      })}
+    </div>
+  `;
+}
+
+function renderBookingsTable() {
+  const tbody = document.getElementById("bookingsTableBody");
+  if (!tbody) return;
+
+  const filtered = applyBookingFilters();
+  tbody.innerHTML = "";
+
+  filtered.forEach(item => {
+    const actionHtml = canEditBookings()
+      ? `
+        <div class="row-actions">
+          ${actionButtonHtml("Edit", "mini-btn mini-edit", {
+            "data-row-action": "edit-booking",
+            "data-ref-code": item.refCode,
+            "data-source-sheet": normalizeBookingSource(item.sourceSheet)
+          })}
+          ${actionButtonHtml("Delete", "mini-btn mini-delete", {
+            "data-row-action": "delete-booking",
+            "data-ref-code": item.refCode,
+            "data-source-sheet": normalizeBookingSource(item.sourceSheet)
+          })}
+        </div>
+      `
+      : getPersonnelActionButtons(item);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(item.refCode)}</td>
+      <td>${escapeHtml(item.fullname)}</td>
+      <td>${escapeHtml(item.service)}</td>
+      <td>${escapeHtml(formatDate(item.date))}</td>
+      <td>${escapeHtml(formatTime(item.time))}</td>
+      <td>${escapeHtml(item.email || "—")}</td>
+      <td>${escapeHtml(item.phone || "—")}</td>
+      <td><span class="${bookingRecordBadgeClass(item.sourceSheet)}">${escapeHtml(bookingRecordLabel(item.sourceSheet))}</span></td>
+      <td>${escapeHtml(item.assistedBy || "—")}</td>
+      <td>
+        <div class="status-cell">
+          <span class="${badgeClass(item.status)}">${escapeHtml(item.status)}</span>
+          ${item.outcomeReason ? `<div class="status-note">${escapeHtml(item.outcomeReason)}</div>` : ""}
+        </div>
+      </td>
+      <td>${actionHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!tbody.innerHTML) {
+    tbody.innerHTML = `<tr><td colspan="11">No bookings match the current filters.</td></tr>`;
+  }
+}
+
+function renderSlotLists() {
+  const dashboardList = document.getElementById("dashboardSlotList");
+  const slotsTableBody = document.getElementById("slotsTableBody");
+  const defaultList = document.getElementById("defaultSlotList");
+
+  if (dashboardList) dashboardList.innerHTML = "";
+  if (slotsTableBody) slotsTableBody.innerHTML = "";
+  if (defaultList) defaultList.innerHTML = "";
+
+  if (dashboardList) {
+    slotRules.slice(0, 5).forEach(item => {
+      const div = document.createElement("div");
+      div.className = "slot-item";
+      div.innerHTML = `
+        <div>
+          <strong>${escapeHtml(formatDate(item.date))}</strong>
+          <div class="slot-meta">${escapeHtml(item.service)}</div>
+        </div>
+        <span class="slot-pill">${escapeHtml(item.available)} slots</span>
+      `;
+      dashboardList.appendChild(div);
+    });
+
+    if (!dashboardList.innerHTML) {
+      dashboardList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🗂️</div>
+          <div>
+            <strong>No custom slot rules yet</strong>
+            <p>Add a custom slot rule to override the default service capacity for a specific date.</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (slotsTableBody) {
+    slotRules.forEach(item => {
+      const key = `${item.date}__${item.service}`;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(formatDate(item.date))}</td>
+        <td>${escapeHtml(item.service)}</td>
+        <td>${escapeHtml(item.available)}</td>
+        <td>
+          <div class="row-actions">
+            ${actionButtonHtml("Edit", "mini-btn mini-slot", {
+              "data-row-action": "edit-slot-rule",
+              "data-slot-key": key
+            })}
+            ${actionButtonHtml("Delete", "mini-btn mini-delete", {
+              "data-row-action": "delete-slot-rule",
+              "data-slot-key": key
+            })}
+          </div>
+        </td>
+      `;
+      slotsTableBody.appendChild(tr);
+    });
+
+    if (!slotsTableBody.innerHTML) {
+      slotsTableBody.innerHTML = `<tr><td colspan="4">No custom slot rules have been configured yet.</td></tr>`;
+    }
+  }
+
+  if (defaultList) {
+    Object.entries(defaultSlots).forEach(([service, count]) => {
+      const div = document.createElement("div");
+      div.className = "slot-item";
+      div.innerHTML = `
+        <div>
+          <strong>${escapeHtml(service)}</strong>
+          <div class="slot-meta">Default capacity</div>
+        </div>
+        <span class="slot-pill">${escapeHtml(count)} slots</span>
+      `;
+      defaultList.appendChild(div);
+    });
+  }
+}
+
+function renderAvailabilityTable() {
+  const tbody = document.getElementById("availabilityTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  availabilityRules.forEach(rule => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(formatDate(rule.date))}</td>
+      <td>${escapeHtml(rule.status)}</td>
+      <td>${escapeHtml(rule.reason || "—")}</td>
+      <td>
+        <div class="row-actions">
+          ${actionButtonHtml("Delete", "mini-btn mini-delete", {
+            "data-row-action": "delete-availability",
+            "data-date": rule.date
+          })}
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!tbody.innerHTML) {
+    tbody.innerHTML = `<tr><td colspan="4">No date availability rules have been configured yet.</td></tr>`;
+  }
+}
+
+function renderUsersTable() {
+  const tbody = document.getElementById("usersTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  users.forEach(user => {
+    const title = String(user.title || "").trim() || defaultUserTitleForRole(user.role);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(user.fullName || "—")}</td>
+      <td>${escapeHtml(user.username || "—")}</td>
+      <td>${escapeHtml(title || "—")}</td>
+      <td>${escapeHtml(user.role || "—")}</td>
+      <td>${escapeHtml(user.status || "—")}</td>
+      <td>
+        <div class="row-actions">
+          ${actionButtonHtml("Edit", "mini-btn mini-edit", {
+            "data-row-action": "edit-user",
+            "data-username": user.username
+          })}
+          ${actionButtonHtml("Delete", "mini-btn mini-delete", {
+            "data-row-action": "delete-user",
+            "data-username": user.username
+          })}
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!tbody.innerHTML) {
+    tbody.innerHTML = `<tr><td colspan="6">No users found.</td></tr>`;
+  }
+}
+
+function renderWeekendSettings() {
+  const saturdayToggle = document.getElementById("saturdayBookingToggle");
+  const sundayToggle = document.getElementById("sundayBookingToggle");
+  const bookingWindowSelect = document.getElementById("bookingWindowMonths");
+
+  const backendVersionLabel = document.getElementById("backendVersionLabel");
+  const archiveCountLabel = document.getElementById("archiveCountLabel");
+  const saturdayLabel = document.getElementById("saturdayBookingLabel");
+  const sundayLabel = document.getElementById("sundayBookingLabel");
+  const bookingWindowLabel = document.getElementById("bookingWindowLabel");
+
+  if (!saturdayToggle || !sundayToggle || !bookingWindowSelect) return;
+  if (!backendVersionLabel || !archiveCountLabel || !saturdayLabel || !sundayLabel || !bookingWindowLabel) return;
+
+  saturdayToggle.value = weekendSettings.saturdayOpen ? "true" : "false";
+  sundayToggle.value = weekendSettings.sundayOpen ? "true" : "false";
+  bookingWindowSelect.value = String(weekendSettings.bookingWindowMonths || 1);
+
+  backendVersionLabel.textContent = weekendSettings.apiVersion || "Unknown";
+  archiveCountLabel.textContent = `${Number(archiveRecordCount || 0)} record${Number(archiveRecordCount || 0) === 1 ? "" : "s"}`;
+  saturdayLabel.textContent = weekendSettings.saturdayOpen ? "Enabled" : "Disabled";
+  sundayLabel.textContent = weekendSettings.sundayOpen ? "Enabled" : "Disabled";
+
+  const months = Number(weekendSettings.bookingWindowMonths || 1);
+  bookingWindowLabel.textContent =
+    months === 1 ? "Current month only" :
+    months === 2 ? "Current + next month" :
+    months === 3 ? "Current + 2 months" :
+    `Current + ${months - 1} months`;
+}
+
+function isLowAvailability(remaining, max) {
+  const cleanRemaining = Number(remaining || 0);
+  const cleanMax = Math.max(0, Number(max || 0));
+  if (cleanRemaining <= 0) return false;
+  return cleanRemaining <= Math.max(2, Math.ceil(cleanMax * 0.2));
+}
+
+function getSlotBoardMonths() {
+  const today = new Date();
+  const count = Math.max(1, Number(weekendSettings.bookingWindowMonths || 1));
+  const result = [];
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    result.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`);
+  }
+
+  return result;
+}
+
+function syncSlotBoardControls(preferred = {}) {
+  const monthSelect = document.getElementById("slotBoardMonth");
+  const serviceSelect = document.getElementById("slotBoardService");
+  const availableMonths = getSlotBoardMonths();
+  const defaultMonth = getTodayIso().slice(0, 7);
+
+  if (monthSelect) {
+    const requestedMonth = String(
+      preferred.month ?? monthSelect.value ?? slotBoardState.month ?? ""
+    ).trim();
+    const nextMonth = availableMonths.includes(requestedMonth)
+      ? requestedMonth
+      : (availableMonths.includes(defaultMonth) ? defaultMonth : (availableMonths[0] || defaultMonth));
+
+    monthSelect.innerHTML = availableMonths.map(monthValue => `
+      <option value="${escapeHtml(monthValue)}">${escapeHtml(formatMonthLabel(monthValue))}</option>
+    `).join("");
+    monthSelect.value = nextMonth;
+    slotBoardState.month = nextMonth;
+  }
+
+  if (serviceSelect) {
+    const requestedService = String(
+      preferred.service ?? serviceSelect.value ?? slotBoardState.service ?? ""
+    ).trim();
+    const nextService = services.includes(requestedService) ? requestedService : "";
+    serviceSelect.value = nextService;
+    slotBoardState.service = nextService;
+  }
+}
+
+function getSlotBoardSelectedServices() {
+  return slotBoardState.service ? [slotBoardState.service] : services.slice();
+}
+
+function getSlotBoardEntryClass(entry) {
+  if (!entry.open) return "is-closed";
+  if (Number(entry.remaining || 0) <= 0) return "is-full";
+  if (isLowAvailability(entry.remaining, entry.max)) return "is-low";
+  return "";
+}
+
+function getSlotBoardEntryLabel(entry) {
+  if (!entry.open) return "Closed";
+  if (Number(entry.remaining || 0) <= 0) return "Full";
+  return `${Number(entry.remaining || 0)} left`;
+}
+
+function getCapacityPercent(booked, max) {
+  const cleanMax = Math.max(0, Number(max || 0));
+  if (!cleanMax) return 0;
+  const cleanBooked = Math.max(0, Number(booked || 0));
+  return Math.max(0, Math.min(100, Math.round((cleanBooked / cleanMax) * 100)));
+}
+
+function getSlotBoardDateClass(entry) {
+  if (Number(entry.totalRemaining || 0) <= 0) return "is-full";
+  if (isLowAvailability(entry.totalRemaining, entry.totalMax)) return "is-low";
+  return "";
+}
+
+function renderSlotBoard() {
+  const summaryEl = document.getElementById("slotBoardSummary");
+  const gridEl = document.getElementById("slotBoardGrid");
+  const detailEl = document.getElementById("slotBoardDetail");
+  const focusMonthEl = document.getElementById("slotBoardFocusMonth");
+  const focusServiceEl = document.getElementById("slotBoardFocusService");
+  const focusDateEl = document.getElementById("slotBoardFocusDate");
+  const focusRemainingEl = document.getElementById("slotBoardFocusRemaining");
+
+  if (!summaryEl || !gridEl || !detailEl) return;
+
+  const monthLabel = formatMonthLabel(slotBoardState.month || getTodayIso().slice(0, 7));
+  const serviceViewLabel = slotBoardState.service || "All services";
+  const monthlyDates = Array.isArray(slotBoardState.monthlyDates) ? slotBoardState.monthlyDates : [];
+  const selectedEntry = monthlyDates.find(item => item.date === slotBoardState.selectedDate) || null;
+
+  if (focusMonthEl) focusMonthEl.textContent = monthLabel;
+  if (focusServiceEl) focusServiceEl.textContent = serviceViewLabel;
+  if (focusDateEl) focusDateEl.textContent = selectedEntry ? formatDate(selectedEntry.date) : "No date selected";
+  if (focusRemainingEl) {
+    focusRemainingEl.textContent = selectedEntry
+      ? `${selectedEntry.totalRemaining} free`
+      : "--";
+  }
+
+  if (slotBoardState.loading && !monthlyDates.length) {
+    summaryEl.innerHTML = `
+      <div class="slot-board-stat"><div class="slot-board-stat-label">Open Dates</div><div class="slot-board-stat-value">...</div><div class="slot-board-stat-meta">${escapeHtml(monthLabel)}</div></div>
+      <div class="slot-board-stat"><div class="slot-board-stat-label">Open Slots</div><div class="slot-board-stat-value">...</div><div class="slot-board-stat-meta">Checking capacity</div></div>
+      <div class="slot-board-stat"><div class="slot-board-stat-label">Watchlist</div><div class="slot-board-stat-value">...</div><div class="slot-board-stat-meta">Scanning low-capacity services</div></div>
+      <div class="slot-board-stat"><div class="slot-board-stat-label">Focus</div><div class="slot-board-stat-value">...</div><div class="slot-board-stat-meta">Preparing detail</div></div>
+    `;
+
+    gridEl.innerHTML = `<div class="slot-board-empty">Loading availability for ${escapeHtml(monthLabel)}.</div>`;
+    detailEl.innerHTML = `
+      <div class="slot-board-detail-head">
+        <div>
+          <h4>Schedule Detail</h4>
+          <p>Fetching live slot data.</p>
+        </div>
+        <div class="slot-board-detail-badge">${escapeHtml(serviceViewLabel)}</div>
+      </div>
+      <div class="slot-board-empty">Refreshing the board.</div>
+    `;
+    return;
+  }
+
+  const totalRemaining = monthlyDates.reduce((sum, item) => {
+    return sum + item.services
+      .filter(serviceEntry => serviceEntry.open)
+      .reduce((entrySum, serviceEntry) => entrySum + Number(serviceEntry.remaining || 0), 0);
+  }, 0);
+  const nearlyFullCount = monthlyDates.reduce((sum, item) => {
+    return sum + item.services.filter(serviceEntry => serviceEntry.open && isLowAvailability(serviceEntry.remaining, serviceEntry.max)).length;
+  }, 0);
+
+  summaryEl.innerHTML = `
+    <div class="slot-board-stat">
+      <div class="slot-board-stat-label">Open Dates</div>
+      <div class="slot-board-stat-value">${monthlyDates.length}</div>
+      <div class="slot-board-stat-meta">${escapeHtml(monthLabel)} | ${escapeHtml(serviceViewLabel)}</div>
+    </div>
+    <div class="slot-board-stat">
+      <div class="slot-board-stat-label">Open Slots</div>
+      <div class="slot-board-stat-value">${totalRemaining}</div>
+      <div class="slot-board-stat-meta">Remaining booking capacity</div>
+    </div>
+    <div class="slot-board-stat">
+      <div class="slot-board-stat-label">Watchlist</div>
+      <div class="slot-board-stat-value">${nearlyFullCount}</div>
+      <div class="slot-board-stat-meta">Low-capacity service schedules</div>
+    </div>
+    <div class="slot-board-stat">
+      <div class="slot-board-stat-label">Focus</div>
+      <div class="slot-board-stat-value">${selectedEntry ? selectedEntry.totalRemaining : "--"}</div>
+      <div class="slot-board-stat-meta">${selectedEntry ? `${escapeHtml(formatDate(selectedEntry.date))} | free slots` : "Select a date card"}</div>
+    </div>
+  `;
+
+  if (!monthlyDates.length) {
+    gridEl.innerHTML = `<div class="slot-board-empty">No open dates found for ${escapeHtml(monthLabel)} in this view.</div>`;
+    detailEl.innerHTML = `
+      <div class="slot-board-detail-head">
+        <div>
+          <h4>No Open Dates</h4>
+          <p>Change the month or broaden the service filter.</p>
+        </div>
+        <div class="slot-board-detail-badge">${escapeHtml(serviceViewLabel)}</div>
+      </div>
+      <div class="slot-board-empty">This view has no open schedule detail yet.</div>
+    `;
+    return;
+  }
+
+  gridEl.innerHTML = monthlyDates.map(item => {
+    const selectedClass = item.date === slotBoardState.selectedDate ? "is-selected" : "";
+    const dateStateClass = getSlotBoardDateClass(item);
+    const utilizationPercent = getCapacityPercent(item.totalBooked, item.totalMax);
+    const focusMeta = item.totalRemaining <= 0
+      ? "No free slots"
+      : `${item.totalRemaining} free`;
+
+    return `
+      <button class="slot-board-date-btn ${selectedClass} ${dateStateClass}" type="button" data-slot-board-date="${escapeHtml(item.date)}">
+        <div class="slot-board-date-top">
+          <div class="slot-board-date-label">
+            <strong>${escapeHtml(String(new Date(`${item.date}T00:00:00`).getDate()))}</strong>
+            <span>${escapeHtml(formatWeekdayLabel(item.date))}</span>
+          </div>
+          <div class="slot-board-date-summary">
+            <strong>${item.totalRemaining}</strong>
+            <span>${item.openServiceCount} open</span>
+          </div>
+        </div>
+        <div class="slot-board-date-meta">
+          <strong>${escapeHtml(focusMeta)}</strong>
+          <span>${utilizationPercent}% used</span>
+        </div>
+        <div class="slot-board-date-meter">
+          <span style="width:${utilizationPercent}%;"></span>
+        </div>
+        <div class="slot-board-service-list">
+          ${item.services.map(serviceEntry => `
+            <div class="slot-board-service-row ${getSlotBoardEntryClass(serviceEntry)}">
+              <strong>${escapeHtml(formatCompactServiceName(serviceEntry.service))}</strong>
+              <span>${escapeHtml(getSlotBoardEntryLabel(serviceEntry))}</span>
+            </div>
+          `).join("")}
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  if (slotBoardState.detailLoading && selectedEntry) {
+    detailEl.innerHTML = `
+      <div class="slot-board-detail-head">
+        <div>
+          <h4>${escapeHtml(formatDate(selectedEntry.date))}</h4>
+          <p>Refreshing service and time-window detail.</p>
+        </div>
+        <div class="slot-board-detail-badge">${escapeHtml(serviceViewLabel)}</div>
+      </div>
+      <div class="slot-board-empty">Refreshing detail for ${escapeHtml(formatDate(selectedEntry.date))}.</div>
+    `;
+    return;
+  }
+
+  if (!selectedEntry) {
+    detailEl.innerHTML = `
+      <div class="slot-board-detail-head">
+        <div>
+          <h4>Select a Date</h4>
+          <p>Choose a card to open service and time detail.</p>
+        </div>
+        <div class="slot-board-detail-badge">${escapeHtml(serviceViewLabel)}</div>
+      </div>
+      <div class="slot-board-empty">Detailed availability appears here after selection.</div>
+    `;
+    return;
+  }
+
+  if (!slotBoardState.detailServices.length) {
+    detailEl.innerHTML = `
+      <div class="slot-board-detail-head">
+        <div>
+          <h4>${escapeHtml(formatDate(selectedEntry.date))}</h4>
+          <p>Detail is not available yet for this date.</p>
+        </div>
+        <div class="slot-board-detail-badge">${escapeHtml(serviceViewLabel)}</div>
+      </div>
+      <div class="slot-board-empty">Refresh the board or select another date.</div>
+    `;
+    return;
+  }
+
+  detailEl.innerHTML = `
+    <div class="slot-board-detail-head">
+      <div>
+        <h4>${escapeHtml(formatDate(selectedEntry.date))}</h4>
+        <p>Live service capacity and one-hour time windows.</p>
+      </div>
+      <div class="slot-board-detail-badge">${escapeHtml(serviceViewLabel)}</div>
+    </div>
+    <div class="slot-board-detail-list">
+      ${slotBoardState.detailServices.map(serviceEntry => `
+        <div class="slot-board-service-card ${getSlotBoardEntryClass(serviceEntry)}">
+          <div class="slot-board-service-card-head">
+            <div>
+              <h5>${escapeHtml(serviceEntry.service)}</h5>
+              <p>
+                ${serviceEntry.open
+                  ? `${Number(serviceEntry.remaining || 0)} free of ${Number(serviceEntry.max || 0)} total`
+                  : escapeHtml(serviceEntry.reason || "Closed for this date.")}
+              </p>
+            </div>
+            <div class="slot-board-service-pill">${escapeHtml(getSlotBoardEntryLabel(serviceEntry))}</div>
+          </div>
+          ${serviceEntry.open ? `
+            <div class="slot-board-service-meter">
+              <span style="width:${getCapacityPercent(serviceEntry.booked, serviceEntry.max)}%;"></span>
+            </div>
+          ` : ""}
+          <div class="slot-board-time-grid">
+            ${serviceEntry.items.map(timeItem => {
+              const timeClass = !timeItem.open
+                ? "is-closed"
+                : Number(timeItem.remaining || 0) <= 0
+                  ? "is-full"
+                  : isLowAvailability(timeItem.remaining, timeItem.max)
+                    ? "is-low"
+                    : "";
+              const timeLabel = !timeItem.open
+                ? (timeItem.reason || "Closed")
+                : Number(timeItem.remaining || 0) <= 0
+                  ? "Full"
+                  : `${Number(timeItem.remaining || 0)} free`;
+
+              return `
+                <div class="slot-board-time-chip ${timeClass}">
+                  <strong>${escapeHtml(formatTime(timeItem.time))}</strong>
+                  <span>${escapeHtml(timeLabel)}</span>
+                  <small>${escapeHtml(!timeItem.open ? (timeItem.reason || "Closed for this date.") : `${Number(timeItem.max || 0)} max`)}</small>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+async function loadSlotBoardDetail(date, options = {}) {
+  const { silent = false, syncBookingFilter = false } = options;
+  if (!date) return;
+
+  const selectedEntry = slotBoardState.monthlyDates.find(item => item.date === date) || null;
+  const activeServices = getSlotBoardSelectedServices();
+
+  slotBoardState.selectedDate = date;
+  slotBoardState.detailLoading = true;
+  renderSlotBoard();
+
+  if (syncBookingFilter) {
+    const filterDateInput = document.getElementById("filterDate");
+    if (filterDateInput) {
+      filterDateInput.value = date;
+      renderBookingsTable();
+    }
+  }
+
+  try {
+    const responses = await Promise.all(activeServices.map(serviceName => apiRequest({
+      action: "slotsForDate",
+      date,
+      service: serviceName
+    })));
+
+    slotBoardState.detailServices = activeServices.map((serviceName, index) => {
+      const response = responses[index];
+      if (response.status === "error") {
+        throw new Error(response.message || `Unable to load slot detail for ${serviceName}.`);
+      }
+
+      const summary = selectedEntry?.services.find(item => item.service === serviceName) || {
+        service: serviceName,
+        booked: 0,
+        max: 0,
+        remaining: 0,
+        open: false,
+        reason: ""
+      };
+
+      return {
+        ...summary,
+        items: Array.isArray(response.items) ? response.items : []
+      };
+    });
+
+    slotBoardState.detailLoading = false;
+    renderSlotBoard();
+  } catch (err) {
+    slotBoardState.detailLoading = false;
+    slotBoardState.detailServices = [];
+    renderSlotBoard();
+
+    if (!silent) {
+      showNotice(err.message || "Unable to load slot detail.", "error");
+    }
+  }
+}
+
+async function loadSlotBoardData(options = {}) {
+  const { silent = false, preserveSelectedDate = true } = options;
+  const monthSelect = document.getElementById("slotBoardMonth");
+  const serviceSelect = document.getElementById("slotBoardService");
+  const requestedMonth = monthSelect?.value || slotBoardState.month || getTodayIso().slice(0, 7);
+  const requestedService = serviceSelect?.value || slotBoardState.service || "";
+
+  syncSlotBoardControls({
+    month: requestedMonth,
+    service: requestedService
+  });
+
+  slotBoardState.month = monthSelect?.value || slotBoardState.month || getTodayIso().slice(0, 7);
+  slotBoardState.service = serviceSelect?.value || "";
+  if (!preserveSelectedDate) {
+    slotBoardState.selectedDate = "";
+  }
+
+  slotBoardState.loading = true;
+  slotBoardState.monthlyDates = [];
+  slotBoardState.detailLoading = false;
+  slotBoardState.detailServices = [];
+  renderSlotBoard();
+
+  try {
+    const activeServices = getSlotBoardSelectedServices();
+    const responses = await Promise.all(activeServices.map(serviceName => apiRequest({
+      action: "monthlySlots",
+      service: serviceName,
+      month: slotBoardState.month
+    })));
+
+    const dateMap = new Map();
+
+    activeServices.forEach((serviceName, index) => {
+      const response = responses[index];
+      if (response.status === "error") {
+        throw new Error(response.message || `Unable to load monthly slots for ${serviceName}.`);
+      }
+
+      const slots = response.slots || {};
+
+      Object.keys(slots).sort().forEach(date => {
+        const raw = slots[date] || {};
+        const booked = Number(raw.booked || 0);
+        const max = Number(raw.max || 0);
+        const remaining = Math.max(0, Number(raw.remaining ?? (max - booked)));
+        const open = raw.open !== false;
+        const reason = String(raw.reason || "");
+
+        if (!dateMap.has(date)) {
+          dateMap.set(date, {
+            date,
+            services: []
+          });
+        }
+
+        dateMap.get(date).services.push({
+          service: serviceName,
+          booked,
+          max,
+          remaining,
+          open,
+          reason
+        });
+      });
+    });
+
+    slotBoardState.monthlyDates = Array.from(dateMap.values())
+      .map(item => {
+        const sortedServices = item.services.slice().sort((a, b) => services.indexOf(a.service) - services.indexOf(b.service));
+        const openServices = sortedServices.filter(serviceEntry => serviceEntry.open);
+        const totalBooked = openServices.reduce((sum, serviceEntry) => sum + Number(serviceEntry.booked || 0), 0);
+        const totalMax = openServices.reduce((sum, serviceEntry) => sum + Number(serviceEntry.max || 0), 0);
+
+        return {
+          date: item.date,
+          services: sortedServices,
+          openServiceCount: openServices.length,
+          totalBooked: totalBooked,
+          totalMax: totalMax,
+          totalRemaining: openServices.reduce((sum, serviceEntry) => sum + Number(serviceEntry.remaining || 0), 0)
+        };
+      })
+      .filter(item => item.openServiceCount > 0)
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
+    slotBoardState.loading = false;
+
+    const todayIso = getTodayIso();
+    const nextSelectedDate = slotBoardState.monthlyDates.some(item => item.date === slotBoardState.selectedDate) && preserveSelectedDate
+      ? slotBoardState.selectedDate
+      : (slotBoardState.monthlyDates.find(item => item.date === todayIso)?.date || slotBoardState.monthlyDates[0]?.date || "");
+
+    slotBoardState.selectedDate = nextSelectedDate;
+    renderSlotBoard();
+
+    if (nextSelectedDate) {
+      await loadSlotBoardDetail(nextSelectedDate, { silent: true, syncBookingFilter: false });
+    } else {
+      slotBoardState.detailLoading = false;
+      slotBoardState.detailServices = [];
+      renderSlotBoard();
+    }
+  } catch (err) {
+    slotBoardState.loading = false;
+    slotBoardState.detailLoading = false;
+    slotBoardState.monthlyDates = [];
+    slotBoardState.detailServices = [];
+    renderSlotBoard();
+
+    if (!silent) {
+      showNotice(err.message || "Unable to load realtime availability.", "error");
+    }
+  }
+}
+
+function formatStatusBreakdown(counts = {}) {
+  return Object.entries(counts)
+    .filter(([, count]) => Number(count || 0) > 0)
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+    .map(([status, count]) => `${status}: ${count}`)
+    .join(", ");
+}
+
+function renderAll() {
+  renderMetrics();
+  renderRecentBookings(filterQuickSearch());
+  renderSlotBoard();
+  renderBookingsTable();
+  renderSlotLists();
+  renderAvailabilityTable();
+  renderUsersTable();
+  renderWeekendSettings();
+}
+
+function resetBookingForm() {
+  editingBookingRef = null;
+  editingBookingSource = LIVE_BOOKING_SOURCE;
+  document.getElementById("bookingModalTitle").textContent = "Add Booking";
+  document.getElementById("bookingRef").value = "";
+  document.getElementById("bookingName").value = "";
+  document.getElementById("bookingEmail").value = "";
+  document.getElementById("bookingPhone").value = "";
+  document.getElementById("bookingDate").value = "";
+  document.getElementById("bookingTime").value = "";
+  document.getElementById("bookingStatus").value = "Confirmed";
+  document.getElementById("bookingService").selectedIndex = 0;
+}
+
+function resetSlotForm() {
+  editingSlotKey = null;
+  document.getElementById("slotModalTitle").textContent = "Add Slot Rule";
+  document.getElementById("slotDate").value = "";
+  document.getElementById("slotCount").value = "";
+  document.getElementById("slotService").selectedIndex = 0;
+}
+
+function resetAvailabilityForm() {
+  document.getElementById("availabilityDate").value = "";
+  document.getElementById("availabilityStatus").value = "OPEN";
+  document.getElementById("availabilityReason").value = "";
+}
+
+function resetUserForm() {
+  editingUsername = null;
+  document.getElementById("userModalTitle").textContent = "Create User";
+  document.getElementById("userFullName").value = "";
+  document.getElementById("userTitle").value = "";
+  document.getElementById("userUsername").value = "";
+  document.getElementById("userPassword").value = "";
+  document.getElementById("userRole").value = "personnel";
+  document.getElementById("userStatus").value = "active";
+  document.getElementById("userPasswordHint").textContent = "Enter a password.";
+}
+
+
+function isAuthErrorResponse(data) {
+  const message = String(data?.message || "");
+  return data?.status === "error" && /unauthorized|session expired|session invalid/i.test(message);
+}
+
+async function forceLogout(redirectMessage) {
+  try {
+    if (sessionToken) {
+      await fetch(EXEC_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=UTF-8"
+        },
+        body: JSON.stringify({
+          action: "logout",
+          sessionToken
+        })
+      });
+    }
+  } catch (err) {
+    // Ignore logout network errors
+  }
+
+  clearStoredSession();
+
+  if (redirectMessage) {
+    sessionStorage.setItem("nid_logout_notice", redirectMessage);
+  }
+
+  window.location.href = "login.html";
+}
+
+async function apiRequest(payload) {
+  const finalPayload = {
+    ...payload,
+    sessionToken,
+    token: sessionToken,
+    authToken: sessionToken,
+    session_token: sessionToken
+  };
+
+  const res = await fetch(EXEC_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    body: JSON.stringify(finalPayload)
+  });
+
+  const raw = await res.json();
+  const data = normalizeResponse(raw);
+
+  if (isAuthErrorResponse(data)) {
+    await forceLogout("Your session has expired. Please log in again.");
+    throw new Error(data.message || "Your session has expired. Please log in again.");
+  }
+
+  return data;
+}
+
+function defaultWeekendSettings() {
+  return {
+    apiVersion: "Unknown",
+    saturdayOpen: false,
+    sundayOpen: false,
+    bookingWindowMonths: 1
+  };
+}
+
+function defaultUserTitleForRole(role) {
+  return String(role || "").trim().toLowerCase() === "admin"
+    ? "System Administrator"
+    : "Registration Kit Operator";
+}
+
+function getSidebarRoleLabel() {
+  return String(userTitle || "").trim() || defaultUserTitleForRole(userRole);
+}
+
+function getSidebarDisplayName() {
+  return String(displayName || username || "User").trim() || "User";
+}
+
+function getNameInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (!parts.length) return "US";
+  return parts.map(part => part.charAt(0).toUpperCase()).join("");
+}
+
+function renderSidebarProfile() {
+  const greetingEl = document.getElementById("sidebarUserGreeting");
+  const roleEl = document.getElementById("sidebarUserRole");
+
+  const name = getSidebarDisplayName();
+  if (greetingEl) greetingEl.textContent = name;
+  if (roleEl) roleEl.textContent = getSidebarRoleLabel();
+}
+
+function setAdminState(data) {
+  bookings = Array.isArray(data?.bookings) ? data.bookings.map(normalizeBookingItem) : [];
+  archivedBookings = Array.isArray(data?.archivedBookings) ? data.archivedBookings.map(normalizeBookingItem) : [];
+  sortBookingsLocal();
+  slotRules = Array.isArray(data?.slotRules) ? data.slotRules : [];
+  availabilityRules = Array.isArray(data?.availabilityRules) ? data.availabilityRules : [];
+  users = Array.isArray(data?.users) ? data.users : [];
+  archiveRecordCount = Number(data?.archiveRecordCount || 0);
+  weekendSettings = data?.systemSettings || defaultWeekendSettings();
+}
+
+function resetAdminState() {
+  bookings = [];
+  archivedBookings = [];
+  slotRules = [];
+  availabilityRules = [];
+  users = [];
+  archiveRecordCount = 0;
+  weekendSettings = defaultWeekendSettings();
+  slotBoardState.monthlyDates = [];
+  slotBoardState.detailServices = [];
+  slotBoardState.loading = false;
+  slotBoardState.detailLoading = false;
+}
+
+function rerenderState() {
+  renderAll();
+}
+
+function bookingDisplayGroup(status) {
+  return isTerminalBookingStatus(status) ? 1 : 0;
+}
+
+function bookingStatusPriority(status) {
+  const normalized = String(status || "").trim();
+
+  if (normalized === "Arrived") return 0;
+  if (normalized === "Pending" || normalized === "Confirmed") return 1;
+  if (normalized === "Assisted") return 2;
+  if (normalized === "Completed") return 3;
+  if (normalized === "Not Successful") return 4;
+  if (normalized === "No Show") return 5;
+  if (normalized === "Cancelled") return 6;
+  return 7;
+}
+
+function parseTimeToMinutes(timeValue) {
+  if (!timeValue) return NaN;
+
+  const str = String(timeValue).trim();
+  const meridianMatch = str.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
+  if (meridianMatch) {
+    let hour = parseInt(meridianMatch[1], 10);
+    const minute = parseInt(meridianMatch[2], 10);
+    const meridian = meridianMatch[3].toUpperCase();
+
+    if (meridian === "AM" && hour === 12) hour = 0;
+    if (meridian === "PM" && hour !== 12) hour += 12;
+    return (hour * 60) + minute;
+  }
+
+  const twentyFourHourMatch = str.match(/^(\d{1,2}):(\d{2})$/);
+  if (twentyFourHourMatch) {
+    const hour = parseInt(twentyFourHourMatch[1], 10);
+    const minute = parseInt(twentyFourHourMatch[2], 10);
+    return (hour * 60) + minute;
+  }
+
+  return NaN;
+}
+
+function bookingScheduleValue(item) {
+  const dateStr = String(item?.date || "").trim();
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return Number.MAX_SAFE_INTEGER;
+
+  const year = parseInt(parts[0], 10);
+  const monthIndex = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const minutes = parseTimeToMinutes(item?.time);
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(monthIndex) ||
+    !Number.isInteger(day) ||
+    monthIndex < 0 ||
+    monthIndex > 11
+  ) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  const hasValidTime = Number.isFinite(minutes);
+  const hours = hasValidTime ? Math.floor(minutes / 60) : 23;
+  const mins = hasValidTime ? minutes % 60 : 59;
+  return new Date(year, monthIndex, day, hours, mins).getTime();
+}
+
+function bookingSortValue(item) {
+  const raw = item?.timestamp ? new Date(item.timestamp).getTime() : NaN;
+  return Number.isFinite(raw) ? raw : 0;
+}
+
+function compareBookingsForDisplay(a, b) {
+  const displayGroupDiff = bookingDisplayGroup(a?.status) - bookingDisplayGroup(b?.status);
+  if (displayGroupDiff !== 0) return displayGroupDiff;
+
+  const scheduleDiff = bookingScheduleValue(a) - bookingScheduleValue(b);
+  if (scheduleDiff !== 0) return scheduleDiff;
+
+  const statusDiff = bookingStatusPriority(a?.status) - bookingStatusPriority(b?.status);
+  if (statusDiff !== 0) return statusDiff;
+
+  const timestampDiff = bookingSortValue(a) - bookingSortValue(b);
+  if (timestampDiff !== 0) return timestampDiff;
+
+  return String(a?.refCode || "").localeCompare(String(b?.refCode || ""));
+}
+
+function sortBookingsLocal() {
+  bookings.sort(compareBookingsForDisplay);
+  archivedBookings.sort(compareBookingsForDisplay);
+}
+
+function upsertBookingLocal(item, originalRefCode = "", sourceSheet = "") {
+  if (!item || !item.refCode) return;
+
+  const normalizedItem = normalizeBookingItem({
+    ...item,
+    sourceSheet: sourceSheet || item.sourceSheet
+  });
+  const original = String(originalRefCode || "").trim();
+  const ref = String(normalizedItem.refCode || "").trim();
+  const refsToRemove = [original, ref].filter(Boolean);
+
+  const keepRow = row => {
+    const rowRef = String(row?.refCode || "").trim();
+    return !rowRef || !refsToRemove.includes(rowRef);
+  };
+
+  bookings = bookings.filter(keepRow);
+  archivedBookings = archivedBookings.filter(keepRow);
+
+  if (normalizeBookingSource(normalizedItem.sourceSheet) === ARCHIVED_BOOKING_SOURCE) {
+    archivedBookings.unshift(normalizedItem);
+  } else {
+    bookings.unshift(normalizedItem);
+  }
+
+  sortBookingsLocal();
+}
+
+function removeBookingLocal(refCode, sourceSheet = "") {
+  const cleanRef = String(refCode || "").trim();
+  if (!cleanRef) return;
+
+  const normalizedSource = String(sourceSheet || "").trim();
+  if (!normalizedSource) {
+    bookings = bookings.filter(item => String(item?.refCode || "").trim() !== cleanRef);
+    archivedBookings = archivedBookings.filter(item => String(item?.refCode || "").trim() !== cleanRef);
+    return;
+  }
+
+  if (normalizeBookingSource(normalizedSource) === ARCHIVED_BOOKING_SOURCE) {
+    archivedBookings = archivedBookings.filter(item => String(item?.refCode || "").trim() !== cleanRef);
+    return;
+  }
+
+  bookings = bookings.filter(item => String(item?.refCode || "").trim() !== cleanRef);
+}
+
+function upsertSlotRuleLocal(item) {
+  if (!item || !item.date || !item.service) return;
+
+  slotRules = slotRules.filter(rule => !(rule.date === item.date && rule.service === item.service));
+  slotRules.push(item);
+  slotRules.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")) || String(a.service || "").localeCompare(String(b.service || "")));
+}
+
+function removeSlotRuleLocal(date, service) {
+  slotRules = slotRules.filter(rule => !(rule.date === date && rule.service === service));
+}
+
+function upsertAvailabilityLocal(item) {
+  if (!item || !item.date) return;
+
+  availabilityRules = availabilityRules.filter(rule => rule.date !== item.date);
+  availabilityRules.push(item);
+  availabilityRules.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+}
+
+function removeAvailabilityLocal(date) {
+  availabilityRules = availabilityRules.filter(rule => rule.date !== date);
+}
+
+function upsertUserLocal(item, originalUsername = "") {
+  if (!item || !item.username) return;
+
+  const original = String(originalUsername || "").trim().toLowerCase();
+  const usernameKey = String(item.username || "").trim().toLowerCase();
+
+  users = users.filter(user => {
+    const userKey = String(user?.username || "").trim().toLowerCase();
+    return userKey !== original && userKey !== usernameKey;
+  });
+
+  users.push(item);
+  users.sort((a, b) => String(a.fullName || "").localeCompare(String(b.fullName || "")));
+}
+
+function removeUserLocal(usernameToDelete) {
+  const target = String(usernameToDelete || "").trim().toLowerCase();
+  users = users.filter(user => String(user?.username || "").trim().toLowerCase() !== target);
+}
+
+async function loadAdminData(options = {}) {
+  const { silent = false } = options;
+
+  try {
+    const data = await apiRequest({
+      action: "adminList"
+    });
+
+    if (data.status === "error") {
+      throw new Error(data.message || "Unable to load admin data.");
+    }
+
+    setAdminState(data);
+    syncSlotBoardControls();
+    rerenderState();
+    await loadSlotBoardData({ silent: true, preserveSelectedDate: true });
+  } catch (err) {
+    resetAdminState();
+    syncSlotBoardControls();
+    rerenderState();
+
+    if (!silent) {
+      showNotice(err.message || "Unable to load admin data.", "error");
+    }
+  }
+}
+
+async function saveWeekendSetting() {
+  if (!isAdmin()) {
+    showNotice("Only admin can update system settings.", "error");
+    return;
+  }
+
+  const saturdayToggle = document.getElementById("saturdayBookingToggle");
+  const sundayToggle = document.getElementById("sundayBookingToggle");
+  const bookingWindowSelect = document.getElementById("bookingWindowMonths");
+
+  if (!saturdayToggle || !sundayToggle || !bookingWindowSelect) return;
+
+  try {
+    const result = await apiRequest({
+      action: "adminSaveSystemSettings",
+      saturdayOpen: saturdayToggle.value,
+      sundayOpen: sundayToggle.value,
+      bookingWindowMonths: bookingWindowSelect.value
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to save system settings.");
+    }
+
+    weekendSettings = result.systemSettings || {
+      saturdayOpen: false,
+      sundayOpen: false,
+      bookingWindowMonths: 1
+    };
+
+    renderWeekendSettings();
+    syncSlotBoardControls();
+    await loadSlotBoardData({ silent: true, preserveSelectedDate: false });
+    showNotice("System settings updated.");
+  } catch (err) {
+    showNotice(err.message || "Unable to save system settings.", "error");
+  }
+}
+
+async function archivePastBookings() {
+  if (!isAdmin()) {
+    showNotice("Only admin can archive bookings.", "error");
+    return;
+  }
+
+  const archiveBeforeDateInput = document.getElementById("archiveBeforeDate");
+  const beforeDate = archiveBeforeDateInput?.value || "";
+
+  if (!beforeDate) {
+    showNotice("Please choose an archive cutoff date.", "error");
+    return;
+  }
+
+  try {
+    const preview = await apiRequest({
+      action: "adminPreviewArchivePastBookings",
+      beforeDate
+    });
+
+    if (preview.status === "error") {
+      throw new Error(preview.message || "Unable to prepare archive preview.");
+    }
+
+    if (Number(preview.previewCount || 0) <= 0) {
+      archiveRecordCount = Number(preview.archiveCount || archiveRecordCount || 0);
+      renderWeekendSettings();
+      showNotice(
+        `No past bookings found before ${formatDate(beforeDate)}. ${preview.archiveSheet || "Appointments Archive"} currently contains ${Number(preview.archiveCount || 0)} record${Number(preview.archiveCount || 0) === 1 ? "" : "s"}.`
+      );
+      return;
+    }
+
+    archivePreviewState = {
+      beforeDate: preview.beforeDate || beforeDate,
+      previewCount: Number(preview.previewCount || 0),
+      archiveCount: Number(preview.archiveCount || 0),
+      archiveCountAfter: Number(preview.archiveCountAfter || 0),
+      archiveSheet: preview.archiveSheet || "Appointments Archive"
+    };
+
+    document.getElementById("archiveConfirmDate").textContent = formatDate(archivePreviewState.beforeDate);
+    document.getElementById("archiveConfirmPreviewCount").textContent = `${archivePreviewState.previewCount} record${archivePreviewState.previewCount === 1 ? "" : "s"}`;
+    document.getElementById("archiveConfirmCurrentCount").textContent = `${archivePreviewState.archiveCount} record${archivePreviewState.archiveCount === 1 ? "" : "s"}`;
+    document.getElementById("archiveConfirmAfterCount").textContent = `${archivePreviewState.archiveCountAfter} record${archivePreviewState.archiveCountAfter === 1 ? "" : "s"}`;
+    openModal("archiveConfirmModal");
+  } catch (err) {
+    showNotice(err.message || "Unable to archive past bookings.", "error");
+  }
+}
+
+async function confirmArchivePastBookings() {
+  if (!archivePreviewState.beforeDate) {
+    showNotice("Please choose an archive cutoff date first.", "error");
+    return;
+  }
+
+  try {
+    const result = await apiRequest({
+      action: "adminArchivePastBookings",
+      beforeDate: archivePreviewState.beforeDate
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to archive past bookings.");
+    }
+
+    closeModal("archiveConfirmModal");
+    await loadAdminData({ silent: true });
+
+    const archivedCount = Number(result.archivedCount || 0);
+    const archiveAfter = Number(result.archiveCountAfter || archiveRecordCount || 0);
+    archiveRecordCount = archiveAfter;
+    renderWeekendSettings();
+
+    showNotice(
+      `Archived ${archivedCount} booking${archivedCount === 1 ? "" : "s"} dated before ${formatDate(archivePreviewState.beforeDate)}. ` +
+      `${result.archiveSheet || archivePreviewState.archiveSheet || "Appointments Archive"} now contains ${archiveAfter} record${archiveAfter === 1 ? "" : "s"}.`
+    );
+
+    archivePreviewState = {
+      beforeDate: "",
+      previewCount: 0,
+      archiveCount: archiveAfter,
+      archiveCountAfter: archiveAfter,
+      archiveSheet: result.archiveSheet || "Appointments Archive"
+    };
+  } catch (err) {
+    showNotice(err.message || "Unable to archive past bookings.", "error");
+  }
+}
+
+async function cleanupDuplicateBookings() {
+  if (!isAdmin()) {
+    showNotice("Only admin can clean duplicate bookings.", "error");
+    return;
+  }
+
+  const confirmed = confirm(
+    "Move all later duplicate active bookings from Appointments to Duplicate Booking Attempts and keep only the earliest scheduled booking for each person?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const result = await apiRequest({
+      action: "adminCleanupDuplicateBookings"
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to clean duplicate bookings.");
+    }
+
+    await loadAdminData({ silent: true });
+
+    const movedCount = Number(result.movedCount || 0);
+    const duplicateRecordCount = Number(result.duplicateRecordCount || 0);
+    const duplicateSheet = result.duplicateSheet || "Duplicate Booking Attempts";
+
+    if (movedCount <= 0) {
+      showNotice(`No later duplicate active bookings were found. ${duplicateSheet} currently contains ${duplicateRecordCount} record${duplicateRecordCount === 1 ? "" : "s"}.`);
+      return;
+    }
+
+    showNotice(
+      `Moved ${movedCount} later duplicate booking${movedCount === 1 ? "" : "s"} from Appointments to ${duplicateSheet}. The earliest schedule for each person was kept. ${duplicateSheet} now contains ${duplicateRecordCount} record${duplicateRecordCount === 1 ? "" : "s"}.`
+    );
+  } catch (err) {
+    showNotice(err.message || "Unable to clean duplicate bookings.", "error");
+  }
+}
+
+
+async function saveAvailability() {
+  if (!isAdmin()) {
+    showNotice("Only admin can save availability rules.", "error");
+    return;
+  }
+
+  const payload = {
+    action: "adminSaveAvailability",
+    date: document.getElementById("availabilityDate").value,
+    status: document.getElementById("availabilityStatus").value,
+    reason: document.getElementById("availabilityReason").value
+  };
+
+  if (!payload.date) {
+    showNotice("Please select an availability date.", "error");
+    return;
+  }
+
+  try {
+    const res = await apiRequest(payload);
+
+    if (res.status === "error") {
+      throw new Error(res.message || "Unable to save availability.");
+    }
+
+    upsertAvailabilityLocal({
+      date: payload.date,
+      status: payload.status,
+      reason: payload.reason || ""
+    });
+
+    rerenderState();
+    showNotice("Availability rule saved.");
+    closeModal("availabilityModal");
+    resetAvailabilityForm();
+  } catch (err) {
+    showNotice(err.message || "Unable to save availability.", "error");
+  }
+}
+
+
+
+async function saveBooking() {
+  const payload = {
+    action: editingBookingRef ? "adminUpdateBooking" : "adminCreateBooking",
+    originalRefCode: editingBookingRef,
+    sourceSheet: editingBookingSource,
+    refCode: document.getElementById("bookingRef").value.trim(),
+    fullname: document.getElementById("bookingName").value.trim().toUpperCase(),
+    service: document.getElementById("bookingService").value,
+    date: document.getElementById("bookingDate").value,
+    time: document.getElementById("bookingTime").value,
+    email: document.getElementById("bookingEmail").value.trim(),
+    phone: document.getElementById("bookingPhone").value.trim(),
+    status: document.getElementById("bookingStatus").value
+  };
+
+  if (!payload.fullname || !payload.service || !payload.date || !payload.time) {
+    showNotice("Please complete the required booking fields.", "error");
+    return;
+  }
+
+  const previous = editingBookingRef
+    ? findBookingByRef(editingBookingRef, editingBookingSource)
+    : null;
+
+  try {
+    const result = await apiRequest(payload);
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to save booking.");
+    }
+
+    const nextBooking = {
+      timestamp: previous?.timestamp || new Date().toISOString(),
+      refCode: (result.refCode || payload.refCode || previous?.refCode || "").trim(),
+      service: payload.service,
+      fullname: payload.fullname,
+      email: payload.email || "",
+      phone: payload.phone || "",
+      date: payload.date,
+      time: payload.time,
+      status: payload.status,
+      userType: previous?.userType || "ADMIN",
+      assistedBy: result.assistedBy || previous?.assistedBy || "",
+      outcomeReason: previous?.outcomeReason || "",
+      sourceSheet: result.sourceSheet || payload.sourceSheet || previous?.sourceSheet || LIVE_BOOKING_SOURCE
+    };
+
+    upsertBookingLocal(
+      nextBooking,
+      editingBookingRef || payload.originalRefCode || "",
+      result.sourceSheet || payload.sourceSheet || previous?.sourceSheet || LIVE_BOOKING_SOURCE
+    );
+
+    rerenderState();
+    showNotice(editingBookingRef ? "Booking updated." : "Booking added.");
+    closeModal("bookingModal");
+    resetBookingForm();
+  } catch (err) {
+    showNotice(err.message || "Unable to save booking.", "error");
+  }
+}
+
+
+
+async function saveSlotRule(fromQuickPanel = false) {
+  if (!isAdmin()) {
+    showNotice("Only admin can save slot rules.", "error");
+    return;
+  }
+
+  const date = fromQuickPanel ? document.getElementById("quickDate").value : document.getElementById("slotDate").value;
+  const service = fromQuickPanel ? document.getElementById("quickService").value : document.getElementById("slotService").value;
+  const available = fromQuickPanel ? document.getElementById("quickSlots").value : document.getElementById("slotCount").value;
+
+  if (!date || !service || available === "") {
+    showNotice("Please complete date, service, and available slots.", "error");
+    return;
+  }
+
+  try {
+    const result = await apiRequest({
+      action: "adminSaveSlot",
+      date,
+      service,
+      available: Number(available)
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to save slot rule.");
+    }
+
+    upsertSlotRuleLocal({
+      date,
+      service,
+      available: Number(available),
+      personnel: null,
+      extraSlots: null
+    });
+
+    rerenderState();
+    showNotice("Slot rule saved.");
+    closeModal("slotModal");
+    resetSlotForm();
+
+    const quickDate = document.getElementById("quickDate");
+    const quickSlots = document.getElementById("quickSlots");
+    if (quickDate) quickDate.value = "";
+    if (quickSlots) quickSlots.value = "";
+  } catch (err) {
+    showNotice(err.message || "Unable to save slot rule.", "error");
+  }
+}
+
+
+
+async function saveUser() {
+  if (!isAdmin()) {
+    showNotice("Only admin can manage users.", "error");
+    return;
+  }
+
+  const passwordInput = document.getElementById("userPassword").value.trim();
+
+  const payload = {
+    action: editingUsername ? "adminUpdateUser" : "adminCreateUser",
+    originalUsername: editingUsername,
+    fullName: document.getElementById("userFullName").value.trim(),
+    title: document.getElementById("userTitle").value.trim(),
+    username: document.getElementById("userUsername").value.trim(),
+    password: passwordInput,
+    role: document.getElementById("userRole").value,
+    status: document.getElementById("userStatus").value
+  };
+
+  if (!payload.fullName || !payload.username || !payload.role) {
+    showNotice("Please complete all required user fields.", "error");
+    return;
+  }
+
+  if (!editingUsername && !payload.password) {
+    showNotice("Password is required for new users.", "error");
+    return;
+  }
+
+  const existing = editingUsername
+    ? users.find(item => item.username === editingUsername)
+    : null;
+
+  try {
+    const result = await apiRequest(payload);
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to save user.");
+    }
+
+    upsertUserLocal({
+      fullName: payload.fullName,
+      title: payload.title,
+      username: payload.username,
+      role: payload.role,
+      status: payload.status,
+      createdAt: existing?.createdAt || new Date().toISOString()
+    }, editingUsername || payload.originalUsername || "");
+
+    const editedCurrentUser =
+      String(username || "").trim().toLowerCase() &&
+      (
+        String(payload.username || "").trim().toLowerCase() === String(username || "").trim().toLowerCase() ||
+        String(payload.originalUsername || "").trim().toLowerCase() === String(username || "").trim().toLowerCase()
+      );
+
+    if (editedCurrentUser) {
+      username = payload.username;
+      displayName = payload.fullName;
+      userRole = payload.role;
+      userTitle = payload.title;
+      sessionStorage.setItem("nid_username", username);
+      sessionStorage.setItem("nid_name", displayName);
+      sessionStorage.setItem("nid_role", userRole);
+      sessionStorage.setItem("nid_title", userTitle);
+      renderSidebarProfile();
+    }
+
+    rerenderState();
+    showNotice(editingUsername ? "User updated." : "User created.");
+    closeModal("userModal");
+    resetUserForm();
+  } catch (err) {
+    showNotice(err.message || "Unable to save user.", "error");
+  }
+}
+
+
+function logout() {
+  forceLogout("");
+}
+
+
+function resetPersonnelProcessModal() {
+  activePersonnelProcessRef = "";
+  activePersonnelProcessSource = "";
+
+  const reasonInput = document.getElementById("personnelProcessReason");
+  if (reasonInput) {
+    reasonInput.value = "";
+    reasonInput.readOnly = false;
+  }
+}
+
+function getActivePersonnelProcessBooking() {
+  if (!activePersonnelProcessRef) return null;
+  return findBookingByRef(activePersonnelProcessRef, activePersonnelProcessSource) || null;
+}
+
+function getPersonnelProcessConfig(item) {
+  const status = String(item?.status || "").trim();
+  const guide = getPersonnelServiceGuide(item?.service);
+
+  const config = {
+    stepIndex: 0,
+    stageTitle: "Check In Client",
+    stageMessage: "Confirm whether the client has arrived for the scheduled service before beginning assistance.",
+    actions: [],
+    showReason: false,
+    reasonReadOnly: false,
+    guide
+  };
+
+  if (status === "Pending" || status === "Confirmed") {
+    config.actions = [
+      { id: "arrived", label: "Mark Arrived", className: "btn btn-primary" },
+      { id: "no_show", label: "Mark No Show", className: "btn btn-danger-soft" }
+    ];
+    return config;
+  }
+
+  if (status === "Arrived") {
+    config.stepIndex = 1;
+    config.stageTitle = "Start Service Assistance";
+    config.stageMessage = "The client has been checked in. Begin the requested service when the desk is ready, or record why the service cannot proceed.";
+    config.showReason = true;
+    config.actions = [
+      { id: "assisted", label: "Start Assistance", className: "btn btn-primary" },
+      { id: "not_successful", label: "Mark Not Successful", className: "btn btn-secondary" }
+    ];
+    return config;
+  }
+
+  if (status === "Assisted") {
+    config.stepIndex = 2;
+    config.stageTitle = "Record Final Outcome";
+    config.stageMessage = "The service is already in progress. Save whether the request was completed successfully or not.";
+    config.showReason = true;
+    config.actions = [
+      { id: "successful", label: guide.successLabel, className: "btn btn-primary" },
+      { id: "not_successful", label: "Mark Not Successful", className: "btn btn-secondary" }
+    ];
+    return config;
+  }
+
+  config.stepIndex = 2;
+  config.actions = [
+    { id: "close", label: "Close", className: "btn btn-secondary" }
+  ];
+
+  if (status === "Completed") {
+    config.stageTitle = "Booking Completed";
+    config.stageMessage = "This booking has already been recorded as completed.";
+    return config;
+  }
+
+  if (status === "Not Successful") {
+    config.stageTitle = "Service Not Successful";
+    config.stageMessage = item?.outcomeReason
+      ? "This booking was marked as not successful. The recorded reason is shown below."
+      : "This booking was marked as not successful.";
+    config.showReason = !!item?.outcomeReason;
+    config.reasonReadOnly = true;
+    return config;
+  }
+
+  if (status === "No Show") {
+    config.stageTitle = "Client Did Not Arrive";
+    config.stageMessage = "This booking was already marked as no show.";
+    return config;
+  }
+
+  if (status === "Cancelled") {
+    config.stageTitle = "Booking Cancelled";
+    config.stageMessage = "This booking has already been cancelled and is now read-only for personnel.";
+    return config;
+  }
+
+  config.stageTitle = "Update Booking Status";
+  config.stageMessage = "Review the booking and select the next action.";
+  config.actions = [
+    { id: "arrived", label: "Mark Arrived", className: "btn btn-primary" },
+    { id: "no_show", label: "Mark No Show", className: "btn btn-danger-soft" }
+  ];
+  return config;
+}
+
+function renderPersonnelProcessModal() {
+  const item = getActivePersonnelProcessBooking();
+  if (!item) return;
+
+  const config = getPersonnelProcessConfig(item);
+  const reasonInput = document.getElementById("personnelProcessReason");
+  const reasonWrap = document.getElementById("personnelReasonWrap");
+
+  document.getElementById("personnelProcessTitle").textContent = isTerminalBookingStatus(item.status) ? "Booking Summary" : "Process Booking";
+  document.getElementById("personnelProcessSubtitle").textContent = isTerminalBookingStatus(item.status)
+    ? "Review the final recorded state for this booking."
+    : "Follow the guided steps below to check in the client, assist them, and save the final result.";
+  document.getElementById("personnelProcessRef").textContent = item.refCode || "-";
+  document.getElementById("personnelProcessStatus").innerHTML = `<span class="${badgeClass(item.status)}">${escapeHtml(item.status || "-")}</span>`;
+  document.getElementById("personnelProcessClient").textContent = item.fullname || "-";
+  document.getElementById("personnelProcessService").textContent = item.service || "-";
+  document.getElementById("personnelProcessSchedule").textContent = `${formatDate(item.date)} at ${formatTime(item.time)}`;
+  document.getElementById("personnelProcessContact").textContent = [item.email || "No email", item.phone || "No phone"].join(" | ");
+  document.getElementById("personnelStageTitle").textContent = config.stageTitle;
+  document.getElementById("personnelStageMessage").textContent = config.stageMessage;
+  document.getElementById("personnelGuideTitle").textContent = config.guide.title;
+  document.getElementById("personnelGuideIntro").textContent = config.guide.intro;
+
+  document.getElementById("personnelProcessSteps").innerHTML = [
+    { label: "Check In", detail: "Confirm arrival" },
+    { label: "Assist Client", detail: "Begin service" },
+    { label: "Record Outcome", detail: "Save final result" }
+  ].map((step, index) => {
+    const className = index < config.stepIndex
+      ? "personnel-process-step done"
+      : index === config.stepIndex
+        ? "personnel-process-step current"
+        : "personnel-process-step";
+    return `
+      <div class="${className}">
+        <span>Step ${index + 1}</span>
+        <strong>${step.label}</strong>
+        <div class="hint-text">${step.detail}</div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("personnelGuideList").innerHTML = config.guide.steps.map((step, index) => `
+    <div class="personnel-guide-item">
+      <div class="personnel-guide-index">${index + 1}</div>
+      <div>${escapeHtml(step)}</div>
+    </div>
+  `).join("");
+
+  if (reasonWrap && reasonInput) {
+    reasonWrap.classList.toggle("hidden", !config.showReason);
+    reasonInput.readOnly = !!config.reasonReadOnly;
+
+    if (config.reasonReadOnly) {
+      reasonInput.value = item.outcomeReason || "";
+    } else if (String(item.status || "").trim() !== "Assisted") {
+      reasonInput.value = item.outcomeReason || "";
+    } else if (!reasonInput.value) {
+      reasonInput.value = item.outcomeReason || "";
+    }
+  }
+
+  document.getElementById("personnelProcessActions").innerHTML = config.actions.map(action => `
+    ${actionButtonHtml(action.label, action.className, {
+      "data-process-action": action.id
+    })}
+  `).join("");
+}
+
+window.openPersonnelProcessModal = function(refCode, sourceSheet = "") {
+  const item = findBookingByRef(refCode, sourceSheet);
+  if (!item) {
+    showNotice("Booking not found.", "error");
+    return;
+  }
+
+  activePersonnelProcessRef = refCode;
+  activePersonnelProcessSource = normalizeBookingSource(item.sourceSheet);
+
+  const reasonInput = document.getElementById("personnelProcessReason");
+  if (reasonInput) {
+    reasonInput.value = item.outcomeReason || "";
+    reasonInput.readOnly = false;
+  }
+
+  renderPersonnelProcessModal();
+  openModal("personnelProcessModal");
+};
+
+async function savePersonnelOutcomeRequest(refCode, outcome, reason = "", options = {}) {
+  const item = findBookingByRef(refCode, options.sourceSheet || activePersonnelProcessSource);
+  if (!item) {
+    showNotice("Booking not found.", "error");
+    return;
+  }
+
+  try {
+    const result = await apiRequest({
+      action: "personnelSaveOutcome",
+      refCode,
+      sourceSheet: item.sourceSheet,
+      outcome,
+      reason
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to save assistance outcome.");
+    }
+
+    const nextStatus = outcome === "Successful" ? "Completed" : "Not Successful";
+
+    upsertBookingLocal({
+      ...item,
+      status: nextStatus,
+      outcome,
+      assistedBy: result.assistedBy || item.assistedBy || "",
+      outcomeReason: reason
+    }, item.refCode, result.sourceSheet || item.sourceSheet);
+
+    rerenderState();
+
+    if (
+      activePersonnelProcessRef === refCode &&
+      normalizeBookingSource(activePersonnelProcessSource) === normalizeBookingSource(item.sourceSheet)
+    ) {
+      closeModal("personnelProcessModal");
+    }
+
+    showNotice(options.successMessage || (outcome === "Successful"
+      ? "Service completed successfully."
+      : "Booking marked as not successful."));
+  } catch (err) {
+    showNotice(err.message || "Unable to save assistance outcome.", "error");
+  }
+}
+
+async function updateBookingStatusRequest(refCode, newStatus, options = {}) {
+  const item = findBookingByRef(refCode, options.sourceSheet || activePersonnelProcessSource);
+  if (!item) {
+    showNotice("Booking not found.", "error");
+    return;
+  }
+
+  try {
+    const result = await apiRequest({
+      action: "adminUpdateBooking",
+      originalRefCode: item.refCode,
+      refCode: item.refCode,
+      fullname: item.fullname,
+      service: item.service,
+      date: item.date,
+      time: item.time,
+      email: item.email || "",
+      phone: item.phone || "",
+      sourceSheet: item.sourceSheet,
+      status: newStatus
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to update booking status.");
+    }
+
+    upsertBookingLocal({
+      ...item,
+      assistedBy: result.assistedBy || item.assistedBy || "",
+      status: newStatus
+    }, item.refCode, result.sourceSheet || item.sourceSheet);
+
+    rerenderState();
+
+    if (
+      options.keepProcessOpen &&
+      activePersonnelProcessRef === refCode &&
+      normalizeBookingSource(activePersonnelProcessSource) === normalizeBookingSource(item.sourceSheet)
+    ) {
+      renderPersonnelProcessModal();
+    } else if (
+      activePersonnelProcessRef === refCode &&
+      normalizeBookingSource(activePersonnelProcessSource) === normalizeBookingSource(item.sourceSheet) &&
+      isTerminalBookingStatus(newStatus)
+    ) {
+      closeModal("personnelProcessModal");
+    }
+
+    showNotice(options.successMessage || `Status updated to ${newStatus}.`);
+  } catch (err) {
+    showNotice(err.message || "Unable to update booking status.", "error");
+  }
+}
+
+window.savePersonnelOutcome = function(refCode, outcome, reason = "", sourceSheet = "") {
+  return savePersonnelOutcomeRequest(refCode, outcome, reason, { sourceSheet });
+};
+
+window.updateBookingStatus = function(refCode, newStatus, sourceSheet = "") {
+  return updateBookingStatusRequest(refCode, newStatus, { sourceSheet });
+};
+
+window.openOutcomeModal = function(refCode, sourceSheet = "") {
+  window.openPersonnelProcessModal(refCode, sourceSheet);
+};
+
+window.submitOutcomeModal = async function() {
+  await window.runPersonnelProcessAction("not_successful");
+};
+
+window.runPersonnelProcessAction = async function(actionId) {
+  const item = getActivePersonnelProcessBooking();
+  if (!item) {
+    showNotice("Booking not found.", "error");
+    return;
+  }
+
+  const reason = String(document.getElementById("personnelProcessReason")?.value || "").trim();
+
+  if (actionId === "close") {
+    closeModal("personnelProcessModal");
+    return;
+  }
+
+  if (actionId === "arrived") {
+    await updateBookingStatusRequest(item.refCode, "Arrived", {
+      sourceSheet: item.sourceSheet,
+      keepProcessOpen: true,
+      successMessage: "Client marked as arrived. Continue with service assistance."
+    });
+    return;
+  }
+
+  if (actionId === "assisted") {
+    await updateBookingStatusRequest(item.refCode, "Assisted", {
+      sourceSheet: item.sourceSheet,
+      keepProcessOpen: true,
+      successMessage: "Service assistance started. Record the final result when done."
+    });
+    return;
+  }
+
+  if (actionId === "successful") {
+    await savePersonnelOutcomeRequest(item.refCode, "Successful", "", {
+      sourceSheet: item.sourceSheet,
+      successMessage: "Service completed successfully."
+    });
+    return;
+  }
+
+  if (actionId === "not_successful") {
+    if (!reason) {
+      showNotice("Please enter the reason before marking this booking as not successful.", "error");
+      return;
+    }
+
+    await savePersonnelOutcomeRequest(item.refCode, "Not Successful", reason, {
+      sourceSheet: item.sourceSheet,
+      successMessage: "Booking marked as not successful."
+    });
+    return;
+  }
+
+  if (actionId === "no_show") {
+    await updateBookingStatusRequest(item.refCode, "No Show", {
+      sourceSheet: item.sourceSheet,
+      successMessage: "Booking marked as no show."
+    });
+  }
+};
+
+function handleDelegatedActionClick(event) {
+  const slotBoardDateButton = event.target.closest("button[data-slot-board-date]");
+  if (slotBoardDateButton) {
+    loadSlotBoardDetail(slotBoardDateButton.dataset.slotBoardDate, {
+      syncBookingFilter: true
+    });
+    return;
+  }
+
+  const rowActionButton = event.target.closest("button[data-row-action]");
+  if (rowActionButton) {
+    const { rowAction, refCode, slotKey, date, username, sourceSheet } = rowActionButton.dataset;
+
+    if (rowAction === "open-process") {
+      window.openPersonnelProcessModal(refCode, sourceSheet);
+      return;
+    }
+
+    if (rowAction === "edit-booking") {
+      window.editBooking(refCode, sourceSheet);
+      return;
+    }
+
+    if (rowAction === "delete-booking") {
+      window.deleteBooking(refCode, sourceSheet);
+      return;
+    }
+
+    if (rowAction === "edit-slot-rule") {
+      window.editSlotRule(slotKey);
+      return;
+    }
+
+    if (rowAction === "delete-slot-rule") {
+      window.deleteSlotRule(slotKey);
+      return;
+    }
+
+    if (rowAction === "delete-availability") {
+      window.deleteAvailability(date);
+      return;
+    }
+
+    if (rowAction === "edit-user") {
+      window.editUser(username);
+      return;
+    }
+
+    if (rowAction === "delete-user") {
+      window.deleteUser(username);
+      return;
+    }
+  }
+
+  const processActionButton = event.target.closest("button[data-process-action]");
+  if (processActionButton) {
+    window.runPersonnelProcessAction(processActionButton.dataset.processAction);
+  }
+}
+
+window.editBooking = function(refCode, sourceSheet = "") {
+  const item = findBookingByRef(refCode, sourceSheet);
+  if (!item) return;
+
+  editingBookingRef = item.refCode;
+  editingBookingSource = normalizeBookingSource(item.sourceSheet);
+  document.getElementById("bookingModalTitle").textContent = "Edit Booking";
+  document.getElementById("bookingRef").value = item.refCode;
+  document.getElementById("bookingName").value = item.fullname;
+  document.getElementById("bookingEmail").value = item.email || "";
+  document.getElementById("bookingPhone").value = item.phone || "";
+  document.getElementById("bookingDate").value = item.date;
+  document.getElementById("bookingTime").value = item.time || "";
+  document.getElementById("bookingStatus").value = item.status || "Confirmed";
+  document.getElementById("bookingService").value = item.service;
+  openModal("bookingModal");
+};
+
+window.deleteBooking = async function(refCode, sourceSheet = "") {
+  const recordLabel = bookingRecordLabel(sourceSheet);
+  if (!confirm(`Delete ${recordLabel.toLowerCase()} booking ${refCode}?`)) return;
+
+  try {
+    const result = await apiRequest({
+      action: "adminDeleteBooking",
+      refCode,
+      sourceSheet
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to delete booking.");
+    }
+
+    removeBookingLocal(refCode, result.sourceSheet || sourceSheet);
+    rerenderState();
+    showNotice("Booking deleted.");
+  } catch (err) {
+    showNotice(err.message || "Unable to delete booking.", "error");
+  }
+};
+
+window.editSlotRule = function(key) {
+  const [date, service] = key.split("__");
+  const item = slotRules.find(s => s.date === date && s.service === service);
+  if (!item) return;
+
+  editingSlotKey = key;
+  document.getElementById("slotModalTitle").textContent = "Edit Slot Rule";
+  document.getElementById("slotDate").value = item.date;
+  document.getElementById("slotService").value = item.service;
+  document.getElementById("slotCount").value = item.available;
+  openModal("slotModal");
+};
+
+window.deleteSlotRule = async function(key) {
+  const [date, service] = key.split("__");
+  if (!confirm(`Delete slot rule for ${service} on ${date}?`)) return;
+
+  try {
+    const result = await apiRequest({
+      action: "adminDeleteSlot",
+      date,
+      service
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to delete slot rule.");
+    }
+
+    removeSlotRuleLocal(date, service);
+    rerenderState();
+    showNotice("Slot rule deleted.");
+  } catch (err) {
+    showNotice(err.message || "Unable to delete slot rule.", "error");
+  }
+};
+
+window.deleteAvailability = async function(date) {
+  if (!confirm("Delete availability rule for " + date + "?")) return;
+
+  try {
+    const res = await apiRequest({
+      action: "adminDeleteAvailability",
+      date: date
+    });
+
+    if (res.status === "error") {
+      throw new Error(res.message || "Unable to delete availability.");
+    }
+
+    removeAvailabilityLocal(date);
+    rerenderState();
+    showNotice("Availability rule deleted.");
+  } catch (err) {
+    showNotice(err.message || "Unable to delete availability.", "error");
+  }
+};
+
+window.editUser = function(usernameToEdit) {
+  const user = users.find(u => u.username === usernameToEdit);
+  if (!user) return;
+
+  editingUsername = user.username;
+  document.getElementById("userModalTitle").textContent = "Edit User";
+  document.getElementById("userFullName").value = user.fullName || "";
+  document.getElementById("userTitle").value = user.title || "";
+  document.getElementById("userUsername").value = user.username || "";
+  document.getElementById("userPassword").value = "";
+  document.getElementById("userRole").value = user.role || "personnel";
+  document.getElementById("userStatus").value = user.status || "active";
+  document.getElementById("userPasswordHint").textContent = "Leave blank to keep the current password.";
+
+  openModal("userModal");
+};
+
+window.deleteUser = async function(usernameToDelete) {
+  if (!confirm(`Delete user ${usernameToDelete}?`)) return;
+
+  try {
+    const result = await apiRequest({
+      action: "adminDeleteUser",
+      username: usernameToDelete
+    });
+
+    if (result.status === "error") {
+      throw new Error(result.message || "Unable to delete user.");
+    }
+
+    removeUserLocal(usernameToDelete);
+    rerenderState();
+    showNotice("User deleted.");
+  } catch (err) {
+    showNotice(err.message || "Unable to delete user.", "error");
+  }
+};
+
+async function validateSessionOnLoad() {
+  const result = await apiRequest({
+    action: "validateSession"
+  });
+
+  if (result.status !== "success") {
+    throw new Error(result.message || "Session expired or invalid.");
+  }
+
+  username = result.username || username;
+  userRole = result.role || userRole;
+  displayName = result.name || displayName;
+  userTitle = String(result.title || "").trim();
+  sessionStorage.setItem("nid_username", username);
+  sessionStorage.setItem("nid_role", userRole);
+  sessionStorage.setItem("nid_name", displayName);
+  sessionStorage.setItem("nid_title", userTitle);
+  if (result.sessionExpiresAt) {
+    sessionExpiresAt = Number(result.sessionExpiresAt);
+    sessionStorage.setItem("nid_session_expires", String(sessionExpiresAt));
+  }
+
+  renderSidebarProfile();
+  return result;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  if (!requireLogin()) return;
+
+  const todayIso = getTodayIso();
+
+  renderSidebarProfile();
+
+  if (userRole === "personnel") {
+    const helpBanner = document.getElementById("personnelHelpBanner");
+    if (helpBanner) helpBanner.style.display = "block";
+    document.querySelector('.nav-btn[data-section="dashboard"]')?.remove();
+    document.querySelector('.nav-btn[data-section="slots"]')?.remove();
+    document.querySelector('.nav-btn[data-section="availability"]')?.remove();
+    document.querySelector('.nav-btn[data-section="users"]')?.remove();
+    document.querySelector('.nav-btn[data-section="settings"]')?.remove();
+
+    document.getElementById("openNewBookingBtn")?.remove();
+    document.getElementById("openBookingModalBtn")?.remove();
+    document.getElementById("openSlotModalBtn")?.remove();
+    document.getElementById("openAvailabilityModalBtn")?.remove();
+    document.getElementById("openUserModalBtn")?.remove();
+    document.getElementById("saveQuickSlotBtn")?.remove();
+
+    const pageTitle = document.querySelector(".title-wrap h2");
+    const pageDesc = document.querySelector(".title-wrap p");
+    const brandTitle = document.querySelector(".brand h1");
+    const brandDesc = document.querySelector(".brand p");
+    if (pageTitle) pageTitle.textContent = "Personnel Assistance Dashboard";
+    if (pageDesc) pageDesc.textContent = "Check in clients, guide the service flow, and record the final result from one process modal.";
+    if (brandTitle) brandTitle.textContent = "Personnel Desk";
+    if (brandDesc) brandDesc.textContent = "National ID Appointment System";
+    if (document.getElementById("filterScope")) {
+      document.getElementById("filterScope").value = "active";
+    }
+    if (document.getElementById("filterDate")) {
+      document.getElementById("filterDate").value = todayIso;
+    }
+
+    switchSection("bookings");
+  }
+
+  const dashboardDateInput = document.getElementById("dashboardDate");
+  if (dashboardDateInput) {
+    dashboardDateInput.value = todayIso;
+  }
+
+  const archiveBeforeDateInput = document.getElementById("archiveBeforeDate");
+  if (archiveBeforeDateInput) {
+    archiveBeforeDateInput.value = todayIso;
+  }
+
+  fillServiceOptions();
+  syncSlotBoardControls();
+  renderAll();
+
+  validateSessionOnLoad()
+    .then(() => loadAdminData({ silent: false }))
+    .catch(() => {
+      // forceLogout already redirects on auth error
+    });
+
+  document.addEventListener("click", handleDelegatedActionClick);
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => switchSection(btn.dataset.section));
+  });
+
+  document.getElementById("dashboardDate")?.addEventListener("change", renderMetrics);
+  document.getElementById("slotBoardMonth")?.addEventListener("change", () => {
+    loadSlotBoardData({ silent: false, preserveSelectedDate: false });
+  });
+  document.getElementById("slotBoardService")?.addEventListener("change", () => {
+    loadSlotBoardData({ silent: false, preserveSelectedDate: false });
+  });
+  document.getElementById("slotBoardRefreshBtn")?.addEventListener("click", () => {
+    loadSlotBoardData({ silent: false, preserveSelectedDate: true });
+  });
+  document.getElementById("refreshBtn")?.addEventListener("click", () => {
+    if (!requireLogin()) return;
+    loadAdminData({ silent: false });
+  });
+
+  document.getElementById("openNewBookingBtn")?.addEventListener("click", () => {
+    resetBookingForm();
+    openModal("bookingModal");
+  });
+
+  document.getElementById("openBookingModalBtn")?.addEventListener("click", () => {
+    resetBookingForm();
+    openModal("bookingModal");
+  });
+
+  document.getElementById("openSlotModalBtn")?.addEventListener("click", () => {
+    resetSlotForm();
+    openModal("slotModal");
+  });
+
+  document.getElementById("openAvailabilityModalBtn")?.addEventListener("click", () => {
+    resetAvailabilityForm();
+    openModal("availabilityModal");
+  });
+
+  document.getElementById("openUserModalBtn")?.addEventListener("click", () => {
+    resetUserForm();
+    openModal("userModal");
+  });
+
+  document.getElementById("saveBookingBtn")?.addEventListener("click", saveBooking);
+  document.getElementById("saveSlotBtn")?.addEventListener("click", () => saveSlotRule(false));
+  document.getElementById("saveQuickSlotBtn")?.addEventListener("click", () => saveSlotRule(true));
+  document.getElementById("saveAvailabilityBtn")?.addEventListener("click", saveAvailability);
+  document.getElementById("saveUserBtn")?.addEventListener("click", saveUser);
+  document.getElementById("saveWeekendSettingBtn")?.addEventListener("click", saveWeekendSetting);
+  document.getElementById("archivePastBookingsBtn")?.addEventListener("click", archivePastBookings);
+  document.getElementById("cleanupDuplicateBookingsBtn")?.addEventListener("click", cleanupDuplicateBookings);
+  document.getElementById("confirmArchiveBtn")?.addEventListener("click", confirmArchivePastBookings);
+  document.getElementById("logoutBtn")?.addEventListener("click", logout);
+  document.getElementById("sidebarLogoutBtn")?.addEventListener("click", logout);
+
+  document.getElementById("quickSearch")?.addEventListener("input", () => {
+    renderRecentBookings(filterQuickSearch());
+  });
+
+  ["filterService", "filterStatus", "filterScope", "filterDate", "filterSearch"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", renderBookingsTable);
+    document.getElementById(id)?.addEventListener("change", renderBookingsTable);
+  });
+
+  document.getElementById("clearFiltersBtn")?.addEventListener("click", () => {
+    document.getElementById("filterService").value = "";
+    document.getElementById("filterStatus").value = "";
+    document.getElementById("filterScope").value = "active";
+    document.getElementById("filterDate").value = userRole === "personnel" ? todayIso : "";
+    document.getElementById("filterSearch").value = "";
+    renderBookingsTable();
+  });
+
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.addEventListener("click", () => closeModal(btn.dataset.close));
+  });
+
+  document.getElementById("bookingName")?.addEventListener("input", e => {
+    e.target.value = e.target.value.toUpperCase().replace(/\s+/g, " ").replace(/^\s+/, "");
+  });
+
+  document.getElementById("userFullName")?.addEventListener("input", e => {
+    e.target.value = e.target.value.replace(/\s+/g, " ").replace(/^\s+/, "");
+  });
+
+  window.addEventListener("click", e => {
+    document.querySelectorAll(".modal").forEach(modal => {
+      if (e.target === modal) closeModal(modal.id);
+    });
+  });
+});
+  </script>
+
+<div class="modal" id="personnelProcessModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h3 id="personnelProcessTitle">Process Booking</h3>
+        <div class="hint-text process-note" id="personnelProcessSubtitle">Review the booking, confirm the client has arrived, and record the final service outcome.</div>
+      </div>
+      <button class="btn btn-secondary" type="button" data-close="personnelProcessModal">Close</button>
+    </div>
+
+    <div class="settings-info-list personnel-process-grid">
+      <div class="settings-info-item">
+        <strong>Reference</strong>
+        <span id="personnelProcessRef">-</span>
+      </div>
+      <div class="settings-info-item">
+        <strong>Current Status</strong>
+        <span id="personnelProcessStatus">-</span>
+      </div>
+      <div class="settings-info-item">
+        <strong>Client</strong>
+        <span id="personnelProcessClient">-</span>
+      </div>
+      <div class="settings-info-item">
+        <strong>Service</strong>
+        <span id="personnelProcessService">-</span>
+      </div>
+      <div class="settings-info-item">
+        <strong>Schedule</strong>
+        <span id="personnelProcessSchedule">-</span>
+      </div>
+      <div class="settings-info-item">
+        <strong>Contact</strong>
+        <span id="personnelProcessContact">-</span>
+      </div>
+    </div>
+
+    <div class="personnel-process-steps" id="personnelProcessSteps"></div>
+
+    <div class="personnel-stage-card">
+      <strong id="personnelStageTitle">Current Step</strong>
+      <p id="personnelStageMessage">Open a booking to start the assisted service flow.</p>
+    </div>
+
+    <div class="field" id="personnelGuideWrap">
+      <label id="personnelGuideTitle" for="personnelGuideList">Service Guide</label>
+      <div class="hint-text" id="personnelGuideIntro">Follow the guide below before recording the final result.</div>
+      <div id="personnelGuideList" class="personnel-guide-list"></div>
+    </div>
+
+    <div class="field hidden" id="personnelReasonWrap">
+      <label for="personnelProcessReason">Reason if not successful</label>
+      <textarea id="personnelProcessReason" rows="4" placeholder="Explain why the service could not be completed."></textarea>
+      <div class="hint-text">Required only when marking the booking as not successful.</div>
+    </div>
+
+    <div class="modal-actions process-actions" id="personnelProcessActions"></div>
+  </div>
+</div>
+
+
+</body>
+</html>
